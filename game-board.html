@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Yugioh Game Board</title>
+    <link rel="stylesheet" href="game-board.css">
+</head>
+<body>
+    <div id="game-container" class="game-container">   
+
+        <div class="game-container-left">
+            <div class="player-info-box">
+                <span class="player-name">Player</span>
+                <span class="player-lp">8000 LP</span>     
+            </div>
+            
+            <div id="turn-indicator">
+                <span>Turn</span>
+                <span id="turn-number">1</span>
+            </div>
+            
+            <div id="phase-tracker">
+                <span class="phase active">DP</span>
+                <span class="phase">SP</span>
+                <span class="phase">M1</span>
+                <span class="phase">BP</span>
+                <span class="phase">M2</span>
+                <span class="phase">EP</span>
+            </div>
+        </div>
+
+        <div class="game-container-center">
+            <div id="opponent-field" class="player-field">
+                <div class="left-zones">
+                    <div class="deck-zone">
+                        <div class="card-slot deck"></div>
+                    </div>
+
+                    <div class="graveyard-zone">
+                        <div class="card-slot graveyard"></div>
+                    </div>
+
+                    <div class="banished-zone">
+                        <div class="card-slot banished"></div>
+                    </div>
+                </div>
+                
+                <div class="middle-zones">
+                    <div class="spell-zone">
+                        <div class="card-slot pendulum"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <data class="card-slot pendulum"></data>
+                    </div>
+
+                    <div class="monster-zone">
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                    </div>
+                </div>   
+                
+                <div class="right-zones">
+                    <div class="extra-deck-zone">
+                        <div class="card-slot deck extra-deck"></div>
+                    </div>
+
+                    <div class="field-zone">
+                        <div class="card-slot"></div>
+                    </div>
+                    
+                    <div class="empty-zone">
+                        <div class="card-slot invisible"></div>
+                    </div>
+                </div>     
+            </div>
+
+            <div id="extra-monster-zone" class="extra-monster-zone">
+                <div class="card-slot invisible"></div>
+                <div class="card-slot"></div>
+                <div class="card-slot invisible"></div>
+                <div class="card-slot"></div>
+                <div class="card-slot invisible"></div>
+            </div>
+
+            <div id="player-field" class="player-field">
+                <div class="left-zones">
+                    <div class="empty-zone">
+                        <div class="card-slot invisible"></div>
+                    </div>
+
+                    <div class="field-zone">
+                        <div class="card-slot"></div>
+                    </div>
+                    
+                    <div class="extra-deck-zone">
+                        <div class="card-slot deck extra-deck"></div>
+                    </div>
+                </div>
+
+                <div class="middle-zones">
+                    <div class="spell-zone">
+                        <div class="card-slot pendulum"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <data class="card-slot pendulum"></data>
+                    </div>
+
+                    <div class="monster-zone">
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><div class="monster-border"></div></div>
+                    </div>
+                </div>
+
+                <div class="right-zones">
+                    <div class="banished-zone">
+                        <div class="card-slot banished"></div>
+                    </div>
+                    
+                    <div class="graveyard-zone">
+                        <div class="card-slot graveyard"></div>
+                    </div>
+
+                    <div class="deck-zone">
+                        <div class="card-slot deck"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-container-right">
+            <div class="player-info-box">
+                <span class="player-name">Oponent</span>
+                <span class="player-lp">8000 LP</span>
+            </div> 
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+body {
+    background-color: #0A1128;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#game-container {
+    width: 80%;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.game-container-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    align-self: flex-start;
+}
+
+.game-container-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0px;
+}
+
+.game-container-right {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: flex-start;
+    align-items: center;
+    align-self: flex-start;
+}
+
+.player-info-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    color: #FFFFFF;
+    margin-top: 0;
+}
+
+.player-name{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.player-lp {
+    font-size: 16px;
+    font-style: italic;
+}
+
+#turn-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    color: #FFFFFF;
+    gap: 5px;
+}
+
+#phase-tracker {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    color: #FFFFFF;
+}
+
+.phase {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 8px;
+    background-color: #333333;
+    border-radius: 5px;
+    border: 1px solid #FFFFFF;
+    text-align: center;
+}
+
+.player-field {
+    display:flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-zones, .right-zones, .middle-zones {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.deck-zone, .extra-deck-zone {
+    display: flex;;
+    justify-content: center;
+    align-items: center;
+}
+
+.spell-zone, .monster-zone, .extra-monster-zone {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+.extra-monster-zone {
+    margin-top: -40.5px;
+    margin-bottom: -40.5px;
+}
+
+.card-slot {
+    position: relative;
+    width: 60px;
+    height: calc(60px * 1.45);
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    background-color: #333333;
+    box-sizing: border-box;
+}
+
+.monster-zone .card-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.monster-border {
+    position: absolute;
+    inset: 0;
+    border: 2px dashed #333333;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transform: rotate(90deg);
+    z-index: -1;
+}
+
+.card-slot.invisible {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+
