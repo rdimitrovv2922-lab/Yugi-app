@@ -7,32 +7,37 @@
 <body>
     <div id="game-container" class="game-container">   
 
-        <div class="game-container-left">
-            <div class="player-info-box">
-                <span class="player-name">Player</span>
-                <span class="player-lp">8000 LP</span>     
-            </div>
-            
+        <div class="game-container-left"> 
             <div id="turn-indicator">
                 <span>Turn</span>
                 <span id="turn-number">1</span>
             </div>
             
             <div id="phase-tracker">
-                <span class="phase active">DP</span>
-                <span class="phase">SP</span>
-                <span class="phase">M1</span>
-                <span class="phase">BP</span>
-                <span class="phase">M2</span>
-                <span class="phase">EP</span>
+                <div class="phase" data-phase="DP">DP</div>
+                <div class="phase" data-phase="SP">SP</div>
+                <div class="phase" data-phase="M1">M1</div>
+                <div class="phase" data-phase="BP">BP</div>
+                <div class="phase" data-phase="M2">M2</div>
+                <div class="phase" data-phase="EP">EP</div>
+            </div>
+
+            <div class="player-info-box">
+                <span class="player-name">Player</span>
+                <span class="player-lp">8000 LP</span>     
             </div>
         </div>
 
         <div class="game-container-center">
-            <div id="opponent-field" class="player-field">
+            <div id="opponent-hand" class="hand-container">
+            </div>
+
+            <div id="opponent-field" class="field-container">
                 <div class="left-zones">
                     <div class="deck-zone">
-                        <div class="card-slot deck"></div>
+                        <div class="card-slot deck">
+                            <button id="draw-btn-opponent">Draw Card</button>
+                        </div>
                     </div>
 
                     <div class="graveyard-zone">
@@ -46,15 +51,15 @@
                 
                 <div class="middle-zones">
                     <div class="spell-zone">
-                        <div class="card-slot pendulum"></div>
+                        <div class="card-slot pendulum-right"></div>
                         <div class="card-slot"></div>
                         <div class="card-slot"></div>
                         <div class="card-slot"></div>
-                        <data class="card-slot pendulum"></data>
+                        <div class="card-slot pendulum-left"></div>
                     </div>
 
                     <div class="monster-zone">
-                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="card-slot"><img src="https://images.ygoprodeck.com/images/cards/89631139.jpg" alt="Blue-Eyes White Dragon"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
@@ -79,13 +84,13 @@
 
             <div id="extra-monster-zone" class="extra-monster-zone">
                 <div class="card-slot invisible"></div>
-                <div class="card-slot"></div>
+                <div class="card-slot"><div class="monster-border"></div></div>
                 <div class="card-slot invisible"></div>
-                <div class="card-slot"></div>
+                <div class="card-slot"><div class="monster-border"></div></div>
                 <div class="card-slot invisible"></div>
             </div>
 
-            <div id="player-field" class="player-field">
+            <div id="player-field" class="field-container">
                 <div class="left-zones">
                     <div class="empty-zone">
                         <div class="card-slot invisible"></div>
@@ -101,20 +106,20 @@
                 </div>
 
                 <div class="middle-zones">
-                    <div class="spell-zone">
-                        <div class="card-slot pendulum"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <data class="card-slot pendulum"></data>
-                    </div>
-
                     <div class="monster-zone">
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
                         <div class="card-slot"><div class="monster-border"></div></div>
+                    </div>
+
+                    <div class="spell-zone">
+                        <div class="card-slot pendulum-left"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot"></div>
+                        <div class="card-slot pendulum-right"></div>
                     </div>
                 </div>
 
@@ -128,10 +133,16 @@
                     </div>
 
                     <div class="deck-zone">
-                        <div class="card-slot deck"></div>
+                        <div class="card-slot deck">
+                            <button id="draw-btn-player">Draw Card</button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div id="player-hand" class="hand-container">
+            </div>
+
         </div>
 
         <div class="game-container-right">
@@ -142,5 +153,6 @@
         </div>
 
     </div>
+<script src="game-board.js"></script>    
 </body>
 </html>
