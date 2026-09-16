@@ -157,7 +157,7 @@ body {
 .spell-zone, .monster-zone, .extra-monster-zone {
     display: flex;
     flex-direction: row;
-    gap: 30px;
+    gap: 35px;
     justify-content: center;
     align-items: center;
 }
@@ -167,16 +167,49 @@ body {
     margin-bottom: -40.5px;
 }
 
+.monster-slot-wrapper {
+    display: grid;
+    place-items: center;
+    width: 5vw;
+    aspect-ratio: 1 / 1.45;
+    max-width: 65px;
+    min-width: 45px;
+    max-height: calc(65px * 1.45);
+    min-height: calc(45px * 1.45);
+}
+
+.wrapper > div {
+    grid-area: 1 / 1;
+}
+
 .card-slot {
-    position: relative;
     width: 5vw; 
     max-width: 65px;
     min-width: 45px;
     aspect-ratio: 1 / 1.45;
+
     border: 2px solid #FFFFFF;
     border-radius: 5px;
     background-color: #333333;
     box-sizing: border-box;
+}
+
+.set-slot {
+    display: flex;
+    
+    width: 5vw; 
+    max-width: 65px;
+    min-width: 45px;
+    aspect-ratio: 1 / 1.45;
+
+    border: 2px dashed #333333;
+    border-radius: 5px;
+    box-sizing: border-box;
+
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    
+    z-index: -1;
 }
 
 .hand-container .card-slot {
@@ -199,22 +232,22 @@ body {
 }
 
 .monster-zone .card-slot {
+    position: absolute;
+
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.monster-border {
+.extra-monster-zone .card-slot {
     position: absolute;
-    inset: 0;
-    border: 2px dashed #333333;
-    border-radius: 5px;
-    box-sizing: border-box;
-    transform: rotate(90deg);
-    z-index: -1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.card-slot.invisible {
+.invisible {
     background-color: transparent;
     border-color: transparent;
 }
@@ -231,9 +264,61 @@ body {
     width: 100%;
     height: 100%;
     aspect-ratio: 1 / 1.45;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: inherit;
     pointer-events: none;
     position: relative;
     z-index: 1;
+}
+
+.set-slot img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.card-in-hand-dropbox {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #222222;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.card-in-hand-dropbox.hidden {
+    display: none;
+}
+
+.dropbox-item {
+    padding: 5px 5px;
+    background-color: #444444;
+    color: #FFFFFF;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.dropbox-item:hover {
+    background-color: #666666;
+}
+
+.card-slot.valid-target {
+    border: 2px dashed #00ff66 !important;
+    background-color: rgba(0, 255, 102, 0.15) !important;
+}
+
+.set-slot.valid-target {
+    border: 2px dashed #00ff66 !important;
+    background-color: rgba(0, 255, 102, 0.15) !important;
+    z-index: 1000;
+}
+
+.set-slot.full {
+    z-index: 1000;
 }

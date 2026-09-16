@@ -59,11 +59,30 @@
                     </div>
 
                     <div class="monster-zone">
-                        <div class="card-slot"><img src="https://images.ygoprodeck.com/images/cards/89631139.jpg" alt="Blue-Eyes White Dragon"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="monster-slot-wrapper"> 
+                            <div id="opm1" class="card-slot" data-index="1"></div>
+                            <div id="opm1-set" class="set-slot" data-index="1"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper">
+                            <div id="opm2" class="card-slot" data-index="2"></div>
+                            <div id="opm2-set" class="set-slot" data-index="2"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="opm3" class="card-slot" data-index="3"></div>
+                            <div id="opm3-set" class="set-slot" data-index="3"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="opm4" class="card-slot" data-index="4"></div>
+                            <div id="opm4-set" class="set-slot" data-index="4"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="opm5" class="card-slot" data-index="5"></div>
+                            <div id="opm5-set" class="set-slot" data-index="5"></div>
+                        </div>
                     </div>
                 </div>   
                 
@@ -83,11 +102,21 @@
             </div>
 
             <div id="extra-monster-zone" class="extra-monster-zone">
-                <div class="card-slot invisible"></div>
-                <div class="card-slot"><div class="monster-border"></div></div>
-                <div class="card-slot invisible"></div>
-                <div class="card-slot"><div class="monster-border"></div></div>
-                <div class="card-slot invisible"></div>
+                <div class="monster-slot-wrapper invisible"></div>
+
+                <div class="monster-slot-wrapper">
+                    <div id="m6" class="card-slot" data-index="2"></div>
+                    <div id="m6-set" class="set-slot" data-index="2"></div>
+                </div>
+
+                <div class="monster-slot-wrapper invisible"></div>
+
+                <div class="monster-slot-wrapper"> 
+                    <div id="m7" class="card-slot" data-index="4"></div>
+                    <div id="m7-set" class="set-slot" data-index="4"></div>
+                </div>
+
+                <div class="monster-slot-wrapper invisible"></div>
             </div>
 
             <div id="player-field" class="field-container">
@@ -107,11 +136,30 @@
 
                 <div class="middle-zones">
                     <div class="monster-zone">
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
-                        <div class="card-slot"><div class="monster-border"></div></div>
+                        <div class="monster-slot-wrapper"> 
+                            <div id="m1" class="card-slot" data-index="1"></div>
+                            <div id="m1-set" class="set-slot" data-index="1"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper">
+                            <div id="m2" class="card-slot" data-index="2"></div>
+                            <div id="m2-set" class="set-slot" data-index="2"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="m3" class="card-slot" data-index="3"></div>
+                            <div id="m3-set" class="set-slot" data-index="3"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="m4" class="card-slot" data-index="4"></div>
+                            <div id="m4-set" class="set-slot" data-index="4"></div>
+                        </div>
+
+                        <div class="monster-slot-wrapper"> 
+                            <div id="m5" class="card-slot" data-index="5"></div>
+                            <div id="m5-set" class="set-slot" data-index="5"></div>
+                        </div>
                     </div>
 
                     <div class="spell-zone">
@@ -153,6 +201,16 @@
         </div>
 
     </div>
-<script src="game-board.js"></script>    
+
+    <div id="card-in-hand-dropbox" class="card-in-hand-dropbox hidden">
+        <div class="dropbox-item" data-action="summon">Summon</div>
+        <div class="dropbox-item" data-action="set">Set</div>
+        <div class="dropbox-item" data-action="activate">Activate</div>
+        <div class="dropbox-item" data-action="graveyard">To GY</div>
+        <div class="dropbox-item" data-action="banish">To Banish</div>
+        <div class="dropbox-item" data-action="return">To Deck</div>
+    </div>
+
+<script type="module" src="js/main.js"></script>    
 </body>
 </html>
