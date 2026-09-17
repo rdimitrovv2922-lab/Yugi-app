@@ -105,15 +105,15 @@
                 <div class="monster-slot-wrapper invisible"></div>
 
                 <div class="monster-slot-wrapper">
-                    <div id="m6" class="card-slot" data-index="2"></div>
-                    <div id="m6-set" class="set-slot" data-index="2"></div>
+                    <div id="m6" class="card-slot" data-index="6"></div>
+                    <div id="m6-set" class="set-slot" data-index="6"></div>
                 </div>
 
                 <div class="monster-slot-wrapper invisible"></div>
 
                 <div class="monster-slot-wrapper"> 
-                    <div id="m7" class="card-slot" data-index="4"></div>
-                    <div id="m7-set" class="set-slot" data-index="4"></div>
+                    <div id="m7" class="card-slot" data-index="7"></div>
+                    <div id="m7-set" class="set-slot" data-index="7"></div>
                 </div>
 
                 <div class="monster-slot-wrapper invisible"></div>
@@ -126,7 +126,7 @@
                     </div>
 
                     <div class="field-zone">
-                        <div class="card-slot"></div>
+                        <div id="s6" class="card-slot" data-index="6"></div>
                     </div>
                     
                     <div class="extra-deck-zone">
@@ -163,11 +163,11 @@
                     </div>
 
                     <div class="spell-zone">
-                        <div class="card-slot pendulum-left"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot pendulum-right"></div>
+                        <div id="s1" class="card-slot pendulum-left" data-index="1"></div>
+                        <div id="s2" class="card-slot" data-index="2"></div>
+                        <div id="s3" class="card-slot" data-index="3"></div>
+                        <div id="s4" class="card-slot" data-index="4"></div>
+                        <div id="s5" class="card-slot pendulum-right" data-index="5"></div>
                     </div>
                 </div>
 
@@ -203,12 +203,24 @@
     </div>
 
     <div id="card-in-hand-dropbox" class="card-in-hand-dropbox hidden">
-        <div class="dropbox-item" data-action="summon">Summon</div>
-        <div class="dropbox-item" data-action="set">Set</div>
+        <div class="dropbox-item" data-action="monster">Monster</div>
+        <div class="dropbox-item" data-action="spell/trap">Spell/Trap</div>
         <div class="dropbox-item" data-action="activate">Activate</div>
         <div class="dropbox-item" data-action="graveyard">To GY</div>
         <div class="dropbox-item" data-action="banish">To Banish</div>
         <div class="dropbox-item" data-action="return">To Deck</div>
+    </div>
+
+    <div id="card-in-hand-dropbox-monster" class="card-in-hand-dropbox-monster hidden">
+        <div class="dropbox-item" data-action="normal-summon">Summon</div>
+        <div class="dropbox-item" data-action="set">Set</div>
+        <div class="dropbox-item" data-action="special-summon-atk">S. Summon Atk</div>
+        <div class="dropbox-item" data-action="special-summon-def">S. Summon Def</div>
+    </div>
+
+    <div id="card-in-hand-dropbox-spell-trap" class="card-in-hand-dropbox-spell-trap hidden">
+        <div class="dropbox-item" data-action="activate">Activate</div>
+        <div class="dropbox-item" data-action="set">Set</div>
     </div>
 
 <script type="module" src="js/main.js"></script>    

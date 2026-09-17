@@ -17,8 +17,11 @@ export default class GameCard {
         this.zoneKey = newZoneKey;
     }
 
-    changeBattlePosition(newPosition, isFaceUp){
+    setBattlePosition(newPosition){
         this.position = newPosition;
-        this.isFaceUp = isFaceUp;
+    }
+
+    setIsFaceUp(newIsSetUp){
+        this.isFaceUp = newIsSetUp;
     }
 }

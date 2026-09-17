@@ -13,19 +13,30 @@ export function drawCard(gameState){
 export function summonMonsterCard(gameState, cardInstance, zoneKey){
     const handIndex = gameState.player.hand.indexOf(cardInstance);
 
-    if(handIndex > -1) gameState.player.hand.splice(handIndex, 1);
+    if (handIndex > -1) gameState.player.hand.splice(handIndex, 1);
 
     cardInstance.moveToLocation('monsterZone', zoneKey);
-    cardInstance.changeBattlePosition('attack', true);
+    cardInstance.setBattlePosition('attack', true);
     gameState.player.monsterZones[zoneKey] = cardInstance;
 }
 
-export function setMonsterCard(gameState, cardInstance, zoneKey, isFaceUp = false){
+export function setMonsterCard(gameState, cardInstance, zoneKey, isFaceUp){
     const handIndex = gameState.player.hand.indexOf(cardInstance);
 
-    if(handIndex > -1) gameState.player.hand.splice(handIndex, 1);
+    if (handIndex > -1) gameState.player.hand.splice(handIndex, 1);
 
     cardInstance.moveToLocation('monsterZone', zoneKey);
-    cardInstance.changeBattlePosition('defence', isFaceUp);
+    cardInstance.setBattlePosition('defence');
+    cardInstance.setIsFaceUp(isFaceUp);
     gameState.player.monsterZones[zoneKey] = cardInstance;
+}
+
+export function activateSpellTrapCard(gameState, cardInstance, zoneKey, isFaceUp){
+    const handIndex = gameState.player.hand.indexOf(cardInstance);
+
+    if (handIndex > -1) gameState.player.hand.splice(handIndex, 1);
+
+    cardInstance.moveToLocation('spellTrapZone', zoneKey);
+    cardInstance.setIsFaceUp(isFaceUp);
+    gameState.player.spellTrapZones[zoneKey] = cardInstance;
 }

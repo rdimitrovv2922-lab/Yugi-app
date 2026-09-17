@@ -182,7 +182,7 @@ body {
     grid-area: 1 / 1;
 }
 
-.card-slot {
+.card-slot {    
     width: 5vw; 
     max-width: 65px;
     min-width: 45px;
@@ -247,6 +247,18 @@ body {
     justify-content: center;
 }
 
+.spell-zone .card-slot{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field-zone .card-slot{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .invisible {
     background-color: transparent;
     border-color: transparent;
@@ -277,6 +289,30 @@ body {
     object-fit: contain;
 }
 
+.card-in-hand-dropbox-monster {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #222222;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.card-in-hand-dropbox-spell-trap {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #222222;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 1001;
+}
+
 .card-in-hand-dropbox {
     position: fixed;
     display: flex;
@@ -289,7 +325,7 @@ body {
     z-index: 1001;
 }
 
-.card-in-hand-dropbox.hidden {
+.hidden {
     display: none;
 }
 
