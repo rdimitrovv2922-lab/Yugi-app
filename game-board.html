@@ -135,7 +135,7 @@
                 </div>
 
                 <div class="middle-zones">
-                    <div class="monster-zone">
+                    <div id="player-monster-zone" class="monster-zone">
                         <div class="monster-slot-wrapper"> 
                             <div id="m1" class="card-slot" data-index="1"></div>
                             <div id="m1-set" class="set-slot" data-index="1"></div>
@@ -162,7 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="spell-zone">
+                    <div id="player-spell-zone" class="spell-zone">
                         <div id="s1" class="card-slot pendulum-left" data-index="1"></div>
                         <div id="s2" class="card-slot" data-index="2"></div>
                         <div id="s3" class="card-slot" data-index="3"></div>
@@ -173,11 +173,11 @@
 
                 <div class="right-zones">
                     <div class="banished-zone">
-                        <div class="card-slot banished"></div>
+                        <div id="banish" class="card-slot banished"></div>
                     </div>
                     
                     <div class="graveyard-zone">
-                        <div class="card-slot graveyard"></div>
+                        <div id="graveyard" class="card-slot graveyard"></div>
                     </div>
 
                     <div class="deck-zone">
@@ -202,27 +202,41 @@
 
     </div>
 
-    <div id="card-in-hand-dropbox" class="card-in-hand-dropbox hidden">
-        <div class="dropbox-item" data-action="monster">Monster</div>
-        <div class="dropbox-item" data-action="spell/trap">Spell/Trap</div>
-        <div class="dropbox-item" data-action="activate">Activate</div>
-        <div class="dropbox-item" data-action="graveyard">To GY</div>
-        <div class="dropbox-item" data-action="banish">To Banish</div>
-        <div class="dropbox-item" data-action="return">To Deck</div>
+    <div id="dropbox" class="dropbox hidden">
+        <div id="monster" class="dropbox-item hidden" data-action="monster">Monster</div>
+        <div id="spell-trap" class="dropbox-item hidden" data-action="spell-trap">Spell/Trap</div>
+        <div id="activate" class="dropbox-item hidden" data-action="activate">Activate</div>
+        <div id="send" class="dropbox-item hidden" data-action="send">Send to</div>
+        <div id="move" class="dropbox-item hidden" data-action="move">Move</div>
+        <div id="switch" class="dropbox-item hidden" data-action="switch">Switch Position</div>
     </div>
 
-    <div id="card-in-hand-dropbox-monster" class="card-in-hand-dropbox-monster hidden">
+    <div id="dropbox-monster" class="dropbox hidden">
         <div class="dropbox-item" data-action="normal-summon">Summon</div>
         <div class="dropbox-item" data-action="set">Set</div>
         <div class="dropbox-item" data-action="special-summon-atk">S. Summon Atk</div>
         <div class="dropbox-item" data-action="special-summon-def">S. Summon Def</div>
     </div>
 
-    <div id="card-in-hand-dropbox-spell-trap" class="card-in-hand-dropbox-spell-trap hidden">
+    <div id="dropbox-spell-trap" class="dropbox hidden">
         <div class="dropbox-item" data-action="activate">Activate</div>
         <div class="dropbox-item" data-action="set">Set</div>
     </div>
 
+    <div id="dropbox-send-to" class="dropbox hidden">
+        <div class="dropbox-item" data-action="graveyard">To GY</div>
+        <div class="dropbox-item" data-action="banish">To Banish</div>
+        <div class="dropbox-item" data-action="hand">To Hand</div>
+        <div class="dropbox-item" data-action="deck">To Deck</div>
+        <div class="dropbox-item" data-action="extradeck">To Ex. Deck</div>
+    </div>
+
+    <div id="dropbox-switch-position" class="dropbox hidden">
+        <div class="dropbox-item" data-action="to-atk">Switch to Atk</div>
+        <div class="dropbox-item" data-action="to-def">Switch to Def</div>
+        <div class="dropbox-item" data-action="to-set">Switch to Set</div>
+        <div class="dropbox-item" data-action="flip">Flip</div>
+    </div>
 <script type="module" src="js/main.js"></script>    
 </body>
 </html>

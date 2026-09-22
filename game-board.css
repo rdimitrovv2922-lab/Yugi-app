@@ -259,6 +259,12 @@ body {
     justify-content: center;
 }
 
+.banished-zone .card-slot, .graveyard-zone .card-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .invisible {
     background-color: transparent;
     border-color: transparent;
@@ -289,7 +295,7 @@ body {
     object-fit: contain;
 }
 
-.card-in-hand-dropbox-monster {
+/*.card-in-hand-dropbox-monster {
     position: fixed;
     display: flex;
     flex-direction: column;
@@ -311,9 +317,33 @@ body {
     border-radius: 5px;
     padding: 5px;
     z-index: 1001;
+}*/
+
+.dropbox {
+     position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #222222;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 1001;
 }
 
 .card-in-hand-dropbox {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #222222;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.card-on-field-dropbox {
     position: fixed;
     display: flex;
     flex-direction: column;

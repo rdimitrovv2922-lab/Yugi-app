@@ -1,8 +1,9 @@
 import GameState from './models/GameState.js';
 import GameCard from './models/GameCard.js';
-import InputController from './ui/InputController.js';
+//import InputController from './ui/InputController.js';
+import InputController from './InputController.js';
 import {renderBoard} from './ui/renderer.js';
-import { updatePhaseDisplay } from './ui/uiHelpers.js';
+import { updatePhaseDisplay } from './ui/PhaseView.js';
 
 const state = new GameState();
 
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBoard(updatedState);
     });
 
-    initializeMockDeck(state, mockCardData, 40);
+    initializeMockDeck(state, mockCardData, mockBlueEyesData,  40);
 
     renderBoard(state);
 });
@@ -25,15 +26,27 @@ const mockCardData = {
     card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/46986414.jpg" }]
 };
 
-function initializeMockDeck(gameState, cardData, count = 40) {
+const mockBlueEyesData = {
+    id: 89631139,
+    name: "Blue-Eyes White Dragon",
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/89631139.jpg" }]
+};
+
+function initializeMockDeck(gameState, cardData, cardData2, count = 40) {
     gameState.player.deck = [];
 
     for (let i = 0; i < count; i++) {
-        const cardInstance = new GameCard(cardData);
+        if(i%2 === 0) {
+            const cardInstance = new GameCard(cardData);
         cardInstance.moveToLocation('deck');
         gameState.player.deck.push(cardInstance);
+        }
+        else {
+            const cardInstance = new GameCard(cardData2);
+            cardInstance.moveToLocation('deck');
+            gameState.player.deck.push(cardInstance);
+        }
     }
-
     console.log(`Initialized deck with ${gameState.player.deck.length} cards.`);
 }
 // Mock for testing ------------------------------------------------------------------------- //

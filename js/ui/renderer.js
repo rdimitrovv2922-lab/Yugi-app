@@ -12,7 +12,7 @@ export function renderMonsterZones(gameState) {
 
         if(!card) return;
 
-        if(card.position === 'attack') {
+        if(card.isPositionAttack) {
             const img = document.createElement('img');
             img.src = card.imageUrl;
             img.alt = card.name;
@@ -113,8 +113,44 @@ export function updateHandContainerVisuals(handId) {
     }
 }
 
+export function renderGraveyard(gameState) {
+    const cardSlotGraveyard = document.getElementById('graveyard');
+    cardSlotGraveyard.innerHTML = '';
+    cardSlotGraveyard.removeAttribute('data-instance-id');
+
+    const countOfCardsInGraveyard = gameState.player.graveyard.length;
+    if( countOfCardsInGraveyard === 0 ) return;
+
+    const card = gameState.player.graveyard[countOfCardsInGraveyard - 1];
+
+    const img = document.createElement('img');
+    img.src = card.imageUrl;
+    img.alt = card.name;
+    cardSlotGraveyard.appendChild(img);
+    cardSlotGraveyard.setAttribute('data-instance-id', card.instanceId);
+}
+
+export function renderBanish(gameState) {
+    const cardSlotBanish = document.getElementById('banish');
+    cardSlotBanish.innerHTML = '';
+    cardSlotBanish.removeAttribute('data-instance-id');
+
+    const countOfCardsInBanish = gameState.player.banish.length;
+    if( countOfCardsInBanish === 0 ) return;
+
+    const card = gameState.player.banish[countOfCardsInBanish - 1];
+
+    const img = document.createElement('img');
+    img.src = card.imageUrl;
+    img.alt = card.name;
+    cardSlotBanish.appendChild(img);
+    cardSlotBanish.setAttribute('data-instance-id', card.instanceId);
+}
+
 export function renderBoard(gameState){
     renderMonsterZones(gameState);
     renderSpellTrapZones(gameState);
     renderPlayerHand(gameState);
+    renderGraveyard(gameState);
+    renderBanish(gameState);
 }

@@ -7,7 +7,8 @@ export default class GameCard {
         
         this.location = 'deck'; // 'hand', 'monsterZone', 'graveyard', etc.
         this.zoneKey = null;    // 'm1', 's3', etc.
-        this.position = 'attack'; // 'attack' or 'defense'
+        //this.position = 'attack';
+        this.isPositionAttack = true; // 'attack' or 'defense'
         this.isFaceUp = true;
         this.rawApiData = apiCardData;
     }
@@ -17,11 +18,17 @@ export default class GameCard {
         this.zoneKey = newZoneKey;
     }
 
-    setBattlePosition(newPosition){
-        this.position = newPosition;
+    setIsPositionAttack(newIsPositionAttack){
+        this.isPositionAttack = newIsPositionAttack;
     }
 
     setIsFaceUp(newIsSetUp){
         this.isFaceUp = newIsSetUp;
+    }
+
+    returnToDefault(){
+        this.zoneKey = null;
+        this.isPositionAttack = true;
+        this.isFaceUp = true;
     }
 }
