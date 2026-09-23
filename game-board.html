@@ -130,7 +130,7 @@
                     </div>
                     
                     <div class="extra-deck-zone">
-                        <div class="card-slot deck extra-deck"></div>
+                        <div id="extradeck" class="card-slot deck extra-deck"></div>
                     </div>
                 </div>
 
@@ -181,7 +181,7 @@
                     </div>
 
                     <div class="deck-zone">
-                        <div class="card-slot deck">
+                        <div id="deck" class="card-slot deck">
                             <button id="draw-btn-player">Draw Card</button>
                         </div>
                     </div>
@@ -201,7 +201,13 @@
         </div>
 
     </div>
-
+    
+    <div id="window" class="window hidden">
+        <div id="window-identifier">Graveyard</div>
+        <div id="window-container" class="window-container">
+        </div>
+    </div>
+    
     <div id="dropbox" class="dropbox hidden">
         <div id="monster" class="dropbox-item hidden" data-action="monster">Monster</div>
         <div id="spell-trap" class="dropbox-item hidden" data-action="spell-trap">Spell/Trap</div>
@@ -209,6 +215,7 @@
         <div id="send" class="dropbox-item hidden" data-action="send">Send to</div>
         <div id="move" class="dropbox-item hidden" data-action="move">Move</div>
         <div id="switch" class="dropbox-item hidden" data-action="switch">Switch Position</div>
+        <div id="flip" class="dropbox-item" data-action="flip">Flip</div>
     </div>
 
     <div id="dropbox-monster" class="dropbox hidden">
@@ -235,7 +242,6 @@
         <div class="dropbox-item" data-action="to-atk">Switch to Atk</div>
         <div class="dropbox-item" data-action="to-def">Switch to Def</div>
         <div class="dropbox-item" data-action="to-set">Switch to Set</div>
-        <div class="dropbox-item" data-action="flip">Flip</div>
     </div>
 <script type="module" src="js/main.js"></script>    
 </body>

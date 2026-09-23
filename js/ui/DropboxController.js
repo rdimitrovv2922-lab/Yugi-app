@@ -60,17 +60,19 @@ export default class DropboxController {
                 this.dropbox.querySelector('#activate').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
                 this.dropbox.querySelector('#move').classList.remove('hidden');
-                this.dropbox.querySelector('#switch').classList.remove('hidden');
 
                 if (sourceLocation === 'spellTrapZone') {
-                    this.dropboxSwitchPosition.querySelector('[data-action="flip"]').classList.remove('hidden');
+                    this.dropbox.querySelector('[data-action="flip"]').classList.remove('hidden');
                 } else if (activeCardInstance.isPositionAttack) {
+                    this.dropbox.querySelector('#switch').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.remove('hidden');
                 } else if (activeCardInstance.isFaceUp) {
+                    this.dropbox.querySelector('#switch').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.remove('hidden');
                 } else {
+                    this.dropbox.querySelector('#switch').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.remove('hidden');
                     this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.remove('hidden');
                 }

@@ -1,12 +1,14 @@
 import * as Rules from './core/GameRules.js';
+import * as Renderer from './ui/renderer.js';
 import * as PhaseView from './ui/PhaseView.js';
-import DropboxController from './ui/DropboxController.js';
 import * as BoardView from './ui/BoardView.js';
+import DropboxController from './ui/DropboxController.js';
+import WindowController from './ui/WindowController.js';
 
 export default class InputController {
-    constructor(state, renderBoardCallback) {
+    constructor(state/*, renderBoardCallback*/) {
         this.state = state;
-        this.renderBoard = renderBoardCallback;
+        //this.renderBoard = renderBoardCallback;
         
         this.activeCardInstance = null;
 
@@ -17,6 +19,10 @@ export default class InputController {
         this.isAttackPosition = true;
 
         this.dropboxController = new DropboxController();
+        this.windowController = new WindowController();
+
+        this.clientX = null;
+        this.clientY = null;
 
         this.initListeners();
     }
@@ -41,12 +47,19 @@ export default class InputController {
     
         this.isSettingCard = false;
         this.isAttackPosition = true;
+
+        this.clientX = null;
+        this.clientY = null;
     
         BoardView.clearHighlightedZones();
     }
 
     hideAllDropboxes() {
         this.dropboxController.hideAll();
+    }
+
+    hideWindow() {
+        this.windowController.hide();
     }
 
     initPhaseTrackerListeners() {
@@ -65,7 +78,7 @@ export default class InputController {
             }
     
             Rules.drawCard(this.state);
-            this.renderBoard(this.state);
+            Renderer.renderBoard(this.state);
         });
     }
 
@@ -82,16 +95,42 @@ export default class InputController {
 
             event.stopPropagation();
             this.hideAllDropboxes();
+            this.hideWindow();
             this.resetInteractionState();
+
+            const isInsidePlayerGraveyard = cardSlot.closest('#graveyard');
+            const isInsidePlayerBanish = cardSlot.closest('#banish');
+            const isInsidePlayerDeck = cardSlot.closest('#deck');
+            const isInsidePlayerExtraDeck = cardSlot.closest('#extradeck');
+
+            if(isInsidePlayerGraveyard) {
+                Renderer.renderWindow(this.state, 'graveyard');
+                this.windowController.showWindow();
+                return;
+            } else if (isInsidePlayerBanish) {
+                Renderer.renderWindow(this.state, 'banish');
+                this.windowController.showWindow();
+                return;
+            } else if (isInsidePlayerDeck) {
+                Renderer.renderWindow(this.state, 'deck');
+                this.windowController.showWindow();
+                return;
+            } else if (isInsidePlayerExtraDeck) {
+                Renderer.renderWindow(this.state, 'extradeck');
+                this.windowController.showWindow();
+                return;
+            }
 
             const instanceId = cardSlot.getAttribute('data-instance-id')
             this.activeCardInstance = this.findCardInstance(instanceId);
-
+            
             if(this.activeCardInstance) {
                 console.log(this.activeCardInstance.instanceId);
-                this.dropboxController.setupDropboxes(this.activeCardInstance);                
-                this.dropboxController.showDropbox(event.clientX, event.clientY);
-            }
+                this.dropboxController.setupDropboxes(this.activeCardInstance);
+                this.clientX = event.clientX;
+                this.clientY = event.clientY;              
+                this.dropboxController.showDropbox(this.clientX, this.clientY);
+            } 
         });
     }
 
@@ -104,21 +143,33 @@ export default class InputController {
 
             switch (action) {
                 case 'monster':
-                    this.dropboxController.showDropbox(event.clientX, event.clientY, 'dropbox-monster');
+                    this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-monster');
                     break;
                 case 'spell-trap':
-                    this.dropboxController.showDropbox(event.clientX, event.clientY, 'dropbox-spell-trap');
+                    this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-spell-trap');
                     break;
                 case 'activate':
                     console.log(`Card ${this.activeCardInstance.name} has been activated from ${this.activeCardInstance.location}!`);
                     break;
                 case 'send':
-                    this.dropboxController.showDropbox(event.clientX, event.clientY, 'dropbox-send-to');
+                    this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-send-to');
                     break;
                 case 'move':
+                    this.isAttackPosition = this.activeCardInstance.isPositionAttack;
+                    this.isSettingCard = !(this.activeCardInstance.isFaceUp);
+                    this.isWaitingForMonsterZone = true;
+                    this.isWaitingForSpellTrapZone = true;
+                    BoardView.highlightValidMonsterZones(this.state, this.isSettingCard);
+                    BoardView.highlightValidSpellTrapZones(this.state);
                     break;
                 case 'switch':
-                    this.dropboxController.showDropbox(event.clientX, event.clientY, 'dropbox-switch-position');
+                    this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-switch-position');
+                    break;
+                case 'flip':
+                    Rules.flipCard(this.state, this.activeCardInstance);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
             }
         });
     }
@@ -145,7 +196,8 @@ export default class InputController {
                     this.isSettingCard = false;
                     break
             }
-        
+            
+            this.hideWindow();
             this.isWaitingForMonsterZone = true;
             BoardView.highlightValidMonsterZones(this.state, this.isSettingCard);
         });
@@ -166,7 +218,8 @@ export default class InputController {
                     this.isSettingCard = true;
                     break;
             }
-        
+            
+            this.hideWindow();
             this.isWaitingForSpellTrapZone = true;
             BoardView.highlightValidSpellTrapZones(this.state);
         });
@@ -196,9 +249,10 @@ export default class InputController {
                     Rules.sendCardToExtraDeck(this.state, this.activeCardInstance);
                     break;
             }
-        
+            
+            this.hideWindow();
             this.resetInteractionState();
-            this.renderBoard(this.state);
+            Renderer.renderBoard(this.state);
         });
     }
 
@@ -219,31 +273,28 @@ export default class InputController {
                 case 'to-set':
                     Rules.switchBattlePositionToDef(this.state, this.activeCardInstance, false);
                     break;
-                case 'flip':
-                    Rules.flipCard(this.state, this.activeCardInstance);
-                    break;
             }
 
+            //this.hideWindow();
             this.resetInteractionState();
-            this.renderBoard(this.state);
+            Renderer.renderBoard(this.state);
         });
     }
 
     initBoardPlacementListeners() {
         document.addEventListener('click', (event) => {
-            // 1. Outside-click drop-down closing check via DropboxController
             if (!this.dropboxController.isInsideAnyDropbox(event.target) && 
                 !event.target.closest('.card-hand')) {
                 this.hideAllDropboxes();
             }
 
-            // 2. If we aren't waiting to place a card, stop here
             if (!this.isWaitingForMonsterZone && !this.isWaitingForSpellTrapZone || !this.activeCardInstance) {
                 return;
             }
 
-            // 3. MONSTER ZONE PLACEMENT HANDLING
+
             if (this.isWaitingForMonsterZone) {
+                this.hideWindow();
                 const targetSlot = event.target.closest('.card-slot') || event.target.closest('.set-slot');
 
                 if (targetSlot) {
@@ -265,7 +316,7 @@ export default class InputController {
                             }
 
                             this.resetInteractionState();
-                            this.renderBoard(this.state);
+                            Renderer.renderBoard(this.state);
                         } else {
                             console.warn("That monster zone is already occupied!");
                         }
@@ -273,8 +324,8 @@ export default class InputController {
                 }
             }
 
-            // 4. SPELL/TRAP ZONE PLACEMENT HANDLING
             if (this.isWaitingForSpellTrapZone) {
+                this.hideWindow();
                 const targetSlot = event.target.closest('.card-slot');
 
                 if (targetSlot) {
@@ -284,7 +335,7 @@ export default class InputController {
                             Rules.activateSpellTrapCard(this.state, this.activeCardInstance, zoneId, !this.isSettingCard);
                             
                             this.resetInteractionState();
-                            this.renderBoard(this.state);
+                            Renderer.renderBoard(this.state);
                         } else {
                             console.warn("That spell/trap zone is already occupied!");
                         }
@@ -294,14 +345,55 @@ export default class InputController {
         });
     }
 
+    initWindowListener() {
+        this.windowController.window.addEventListener('click', (event) => {
+            const cardSlot = event.target.closest('[data-instance-id]');
+            if(!cardSlot) return;
+
+            const isInsideWindow = cardSlot.closest('#window');
+            if(!isInsideWindow) {
+                console.log("here");
+                this.hideWindow();
+                return;
+            }
+
+            event.stopPropagation();
+            this.resetInteractionState();
+
+            const instanceId = cardSlot.getAttribute('data-instance-id')
+            this.activeCardInstance = this.findCardInstance(instanceId);
+            
+            if(!this.activeCardInstance) return;
+
+            console.log(this.activeCardInstance.instanceId);
+            this.dropboxController.setupDropboxes(this.activeCardInstance);
+            this.clientX = event.clientX;
+            this.clientY = event.clientY;              
+            this.dropboxController.showDropbox(this.clientX, this.clientY);
+        });
+    }
+
+    initOutsideWindowClickListener() {
+        document.addEventListener('click', (event) => {
+            const isWindowVisible = !this.windowController.window.classList.contains('hidden');
+            if (!isWindowVisible) return;
+
+            const clickedInsideWindow = event.target.closest('#window');
+            const clickedGraveyardBtn = event.target.closest('#graveyard'); 
+
+            if (!clickedInsideWindow && !clickedGraveyardBtn) {
+                this.hideWindow();
+            }
+        });
+    }
+
     initListeners() {
         this.initPhaseTrackerListeners();
         this.initDrawButtonListener();
 
-        //this.initOutsideClickListener();
-
         this.initCardClickListener();
         this.initDropboxListener();
+        this.initWindowListener();
 
         this.initDropboxMonsterListener();
         this.initDropboxSpellTrapListener();
@@ -309,6 +401,8 @@ export default class InputController {
         this.initDropboxSwitchPositionListener();
 
         this.initBoardPlacementListeners();
+
+        this.initOutsideWindowClickListener();
     }
 
 }

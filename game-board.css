@@ -5,11 +5,15 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+
+    position: relative;
 }
 
 #game-container {
+    position: absolute;
     max-width: 1200px;
     width: 80%;
+    margin: 0 auto;
     transform: scale(0.9);
     transform-origin: center center;
 }
@@ -24,13 +28,13 @@ body {
     user-select: none;
 }
 
-.game-container-left {
+.game-container-left, 
+.game-container-right {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    /*align-self: flex-end;
-    gap: 50px;*/
+    flex: 0 0 100px; /* Give both side columns an exact, equal fixed width */
 }
 
 .game-container-center {
@@ -41,14 +45,14 @@ body {
     gap: 0px;
 }
 
-.game-container-right {
+/*.game-container-right {
     display: flex;
     flex-direction: column;
     gap: 5px;
     justify-content: flex-start;
     align-items: center;
     align-self: flex-start;
-}
+}*/
 
 .player-info-box {
     display: flex;
@@ -75,7 +79,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px;
     color: #FFFFFF;
     gap: 5px;
 }
@@ -192,6 +196,7 @@ body {
     border-radius: 5px;
     background-color: #333333;
     box-sizing: border-box;
+    display: flex;
 }
 
 .set-slot {
@@ -295,30 +300,6 @@ body {
     object-fit: contain;
 }
 
-/*.card-in-hand-dropbox-monster {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background-color: #222222;
-    border: 2px solid #FFFFFF;
-    border-radius: 5px;
-    padding: 5px;
-    z-index: 1001;
-}
-
-.card-in-hand-dropbox-spell-trap {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background-color: #222222;
-    border: 2px solid #FFFFFF;
-    border-radius: 5px;
-    padding: 5px;
-    z-index: 1001;
-}*/
-
 .dropbox {
      position: fixed;
     display: flex;
@@ -331,32 +312,8 @@ body {
     z-index: 1001;
 }
 
-.card-in-hand-dropbox {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background-color: #222222;
-    border: 2px solid #FFFFFF;
-    border-radius: 5px;
-    padding: 5px;
-    z-index: 1001;
-}
-
-.card-on-field-dropbox {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background-color: #222222;
-    border: 2px solid #FFFFFF;
-    border-radius: 5px;
-    padding: 5px;
-    z-index: 1001;
-}
-
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .dropbox-item {
@@ -387,4 +344,53 @@ body {
 
 .set-slot.full {
     z-index: 1000;
+}
+
+.window {
+    position: absolute;
+    display: grid;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    transform: scale(0.9);
+    transform-origin: center center;
+
+    gap: 10px;
+    width: 45%;
+    box-sizing: border-box;
+
+    border: 2px solid #d4af37; 
+    border-radius: 8px;
+    padding: 20px;
+
+    background-color: rgba(15, 15, 20, 0.85);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+}
+
+.window-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.window .card-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 4.5vw; 
+    max-width: 58px;
+    min-width: 40px;
+    aspect-ratio: 1 / 1.45;
+    flex-shrink: 0;
 }

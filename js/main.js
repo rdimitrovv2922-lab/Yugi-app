@@ -10,9 +10,11 @@ const state = new GameState();
 document.addEventListener('DOMContentLoaded', () => {
     updatePhaseDisplay('DP');
 
-    const inputController = new InputController(state, (updatedState) => {
+    /*const inputController = new InputController(state, (updatedState) => {
         renderBoard(updatedState);
-    });
+    });*/
+
+    const inputController = new InputController(state);
 
     initializeMockDeck(state, mockCardData, mockBlueEyesData,  40);
 
