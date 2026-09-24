@@ -181,9 +181,7 @@
                     </div>
 
                     <div class="deck-zone">
-                        <div id="deck" class="card-slot deck">
-                            <button id="draw-btn-player">Draw Card</button>
-                        </div>
+                        <div id="deck" class="card-slot deck"></div>
                     </div>
                 </div>
             </div>
@@ -231,11 +229,12 @@
     </div>
 
     <div id="dropbox-send-to" class="dropbox hidden">
-        <div class="dropbox-item" data-action="graveyard">To GY</div>
-        <div class="dropbox-item" data-action="banish">To Banish</div>
-        <div class="dropbox-item" data-action="hand">To Hand</div>
-        <div class="dropbox-item" data-action="deck">To Deck</div>
-        <div class="dropbox-item" data-action="extradeck">To Ex. Deck</div>
+        <div class="dropbox-item" data-action="graveyard">GY</div>
+        <div class="dropbox-item" data-action="banish-up">Banish F-Up</div>
+        <div class="dropbox-item" data-action="banish-down">Banish F-Down</div>
+        <div class="dropbox-item" data-action="hand">Hand</div>
+        <div class="dropbox-item" data-action="deck">Deck</div>
+        <div class="dropbox-item" data-action="extradeck">Ex. Deck</div>
     </div>
 
     <div id="dropbox-switch-position" class="dropbox hidden">
@@ -243,6 +242,20 @@
         <div class="dropbox-item" data-action="to-def">Switch to Def</div>
         <div class="dropbox-item" data-action="to-set">Switch to Set</div>
     </div>
+
+    <div id="dropbox-pile" class="dropbox hidden">
+        <div class="dropbox-item" data-action="draw">Draw</div> 
+        <div class="dropbox-item" data-action="shuffle">Shuffle</div>
+        <div class="dropbox-item" data-action="mill">Mill</div>
+        <div class="dropbox-item" data-action="banish-up">Banish</div> 
+        <div class="dropbox-item" data-action="banish-down">Banish F-Down</div>
+        <div class="dropbox-item" data-action="view">View</div>
+        <div class="dropbox-item" data-action="banish-r-up">Banish Random</div>
+        <div class="dropbox-item" data-action="banish-r-down">Banish F-D Random</div>
+        <div class="dropbox-item" data-action="to-gy-r">Send to GY Random</div>
+        <div class="dropbox-item" data-action="to-deck-r">Send to Deck Random</div>
+    </div>
+
 <script type="module" src="js/main.js"></script>    
 </body>
 </html>

@@ -24,7 +24,7 @@ export function renderExtraDeck(gameState) {
     const countOfCardsInExtraDeck = gameState.player.extradeck.length;
     if( countOfCardsInExtraDeck === 0 ) return;
 
-    const card = gameState.player.deck[countOfCardsInExtraDeck - 1];
+    const card = gameState.player.extradeck[countOfCardsInExtraDeck - 1];
 
     const img = document.createElement('img');
     img.src = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/3c938f85-f834-4bb3-b3b2-97d295769464/dal6wsb-fc4aaba4-d6ff-4029-a83f-9b518abd511d.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi8zYzkzOGY4NS1mODM0LTRiYjMtYjNiMi05N2QyOTU3Njk0NjQvZGFsNndzYi1mYzRhYWJhNC1kNmZmLTQwMjktYTgzZi05YjUxOGFiZDUxMWQucG5nIn1dXX0._Al6plUB_BwuHO4MI18fPE6GgtgvtaTTUGRHdqVo0sg";
@@ -177,13 +177,20 @@ export function renderBanish(gameState) {
     const card = gameState.player.banish[countOfCardsInBanish - 1];
 
     const img = document.createElement('img');
-    img.src = card.imageUrl;
-    img.alt = card.name;
+    if (card.isFaceUp) {
+        img.src = card.imageUrl;
+        img.alt = card.name;
+    } else {
+        img.src = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/3c938f85-f834-4bb3-b3b2-97d295769464/dal6wsb-fc4aaba4-d6ff-4029-a83f-9b518abd511d.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi8zYzkzOGY4NS1mODM0LTRiYjMtYjNiMi05N2QyOTU3Njk0NjQvZGFsNndzYi1mYzRhYWJhNC1kNmZmLTQwMjktYTgzZi05YjUxOGFiZDUxMWQucG5nIn1dXX0._Al6plUB_BwuHO4MI18fPE6GgtgvtaTTUGRHdqVo0sg";
+        img.alt = "Set card";
+    }
+
     cardSlotBanish.appendChild(img);
     cardSlotBanish.setAttribute('data-instance-id', card.instanceId);
 }
 
 export function renderWindow(gameState, location) {
+    console.log("In window render!");
     const window = document.getElementById('window-container');
     const windowIdentifier = document.getElementById('window-identifier');
     window.innerHTML = '';
@@ -195,6 +202,7 @@ export function renderWindow(gameState, location) {
         case 'graveyard':
             windowIdentifier.textContent = "Graveyard";
             target = gameState.player.graveyard;
+            console.log("In graveyard window render!");
             break;
         case 'banish':
             windowIdentifier.textContent = "Banish";
@@ -220,10 +228,15 @@ export function renderWindow(gameState, location) {
         cardSlot.setAttribute('data-instance-id', card.instanceId);
 
         const img = document.createElement('img');
-        img.src = card.imageUrl;
-        img.alt = card.name;
-        cardSlot.appendChild(img);
+        if (card.isFaceUp) {
+            img.src = card.imageUrl;
+            img.alt = card.name;
+        } else {
+            img.src = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/3c938f85-f834-4bb3-b3b2-97d295769464/dal6wsb-fc4aaba4-d6ff-4029-a83f-9b518abd511d.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi8zYzkzOGY4NS1mODM0LTRiYjMtYjNiMi05N2QyOTU3Njk0NjQvZGFsNndzYi1mYzRhYWJhNC1kNmZmLTQwMjktYTgzZi05YjUxOGFiZDUxMWQucG5nIn1dXX0._Al6plUB_BwuHO4MI18fPE6GgtgvtaTTUGRHdqVo0sg";
+            img.alt = "Set card";
+        }
 
+        cardSlot.appendChild(img);
         window.appendChild(cardSlot);
     });
 }

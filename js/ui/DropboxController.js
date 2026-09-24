@@ -5,6 +5,8 @@ export default class DropboxController {
         this.dropboxSpellTrap = document.getElementById('dropbox-spell-trap');
         this.dropboxSendTo = document.getElementById('dropbox-send-to');
         this.dropboxSwitchPosition = document.getElementById('dropbox-switch-position');
+
+        this.dropboxPile = document.getElementById('dropbox-pile');
     }
 
     hideAll() {
@@ -13,6 +15,8 @@ export default class DropboxController {
         this.dropboxSpellTrap.classList.add('hidden');
         this.dropboxSendTo.classList.add('hidden');
         this.dropboxSwitchPosition.classList.add('hidden');
+
+        this.dropboxPile.classList.add('hidden');
     }
 
     showDropbox(x, y, dropboxId='dropbox') {
@@ -47,13 +51,21 @@ export default class DropboxController {
             case 'extradeck':
             case 'hand':
             case 'graveyard':
-            case 'banish':    
                 this.dropbox.querySelector('#monster').classList.remove('hidden');
                 this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
                 if (sourceLocation != 'deck') this.dropbox.querySelector('#activate').classList.remove('hidden');
 
                 this.dropboxSendTo.querySelector(`[data-action="${sourceLocation}"]`).classList.add('hidden');
+                break;
+            case 'banish':
+                this.dropbox.querySelector('#monster').classList.remove('hidden');
+                this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
+                this.dropbox.querySelector('#send').classList.remove('hidden');
+                this.dropbox.querySelector('#activate').classList.remove('hidden');
+
+                this.dropboxSendTo.querySelector(`[data-action="banish-up"]`).classList.add('hidden');
+                this.dropboxSendTo.querySelector(`[data-action="banish-down"]`).classList.add('hidden');
                 break;
             case 'monsterZone':
             case 'spellTrapZone':
@@ -78,5 +90,23 @@ export default class DropboxController {
                 }
                 break;   
         }
+    }
+
+    setupDropboxPile(sourceLocation) {
+        const allOptions = this.dropboxPile.querySelectorAll('.dropbox-item');
+        allOptions.forEach(el => el.classList.add('hidden'));
+
+        const pileActions = {
+            deck: ['draw', 'shuffle', 'mill', 'banish-up', 'banish-down', 'view'],
+            extradeck: ['view', 'shuffle', 'banish-r-up', 'banish-r-down', 'to-gy-r'],
+            graveyard: ['view', 'banish-r-up', 'banish-r-down'],
+            banish: ['view', 'to-gy-r', 'to-deck-r']
+        };
+
+        const actionsToShow = pileActions[sourceLocation] || [];
+        actionsToShow.forEach(action => {
+            const item = this.dropboxPile.querySelector(`[data-action="${action}"]`);
+            if (item) item.classList.remove('hidden');
+        });
     }
 }

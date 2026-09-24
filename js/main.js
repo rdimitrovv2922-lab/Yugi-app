@@ -4,20 +4,26 @@ import GameCard from './models/GameCard.js';
 import InputController from './InputController.js';
 import {renderBoard} from './ui/renderer.js';
 import { updatePhaseDisplay } from './ui/PhaseView.js';
+import { drawCard} from './core/GameRules.js';
 
 const state = new GameState();
 
 document.addEventListener('DOMContentLoaded', () => {
     updatePhaseDisplay('DP');
 
-    /*const inputController = new InputController(state, (updatedState) => {
-        renderBoard(updatedState);
-    });*/
-
     const inputController = new InputController(state);
 
     initializeMockDeck(state, mockCardData, mockBlueEyesData,  40);
 
+    for(let i = 0; i < 15; i++) {
+        const cardInstance = new GameCard(mockCardDataFusion);
+        cardInstance.moveToLocation('extradeck');
+        state.player.extradeck.push(cardInstance);
+    }
+
+    for(let i = 0; i < 5; i++) {
+        drawCard(state);
+    }
     renderBoard(state);
 });
 
@@ -34,14 +40,20 @@ const mockBlueEyesData = {
     card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/89631139.jpg" }]
 };
 
+const mockCardDataFusion = {
+    id: 23995346,
+    name: "Blue-Eyes Ultimate Dragon",
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/23995346.jpg" }]
+};
+
 function initializeMockDeck(gameState, cardData, cardData2, count = 40) {
     gameState.player.deck = [];
 
     for (let i = 0; i < count; i++) {
         if(i%2 === 0) {
             const cardInstance = new GameCard(cardData);
-        cardInstance.moveToLocation('deck');
-        gameState.player.deck.push(cardInstance);
+            cardInstance.moveToLocation('deck');
+            gameState.player.deck.push(cardInstance);
         }
         else {
             const cardInstance = new GameCard(cardData2);

@@ -77,9 +77,10 @@ export function sendCardToGraveyard(gameState, cardInstance) {
     gameState.player.graveyard.push(cardInstance);
 }
 
-export function sendCardToBanish(gameState, cardInstance) {
+export function sendCardToBanish(gameState, cardInstance, isFaceUp = true) {
     removeCardFromSource(gameState, cardInstance, cardInstance.location);
 
+    cardInstance.setIsFaceUp(isFaceUp);
     cardInstance.moveToLocation('banish');
     gameState.player.banish.push(cardInstance);
 }
@@ -117,4 +118,41 @@ export function switchBattlePositionToDef(gameState, cardInstance, isFaceUp=true
 
 export function flipCard(gameState, cardInstance) {
     cardInstance.setIsFaceUp(!cardInstance.isFaceUp);
+}
+
+export function shufflePile(gameState, pileName) {
+    const pileArray = gameState.player[pileName]; 
+    
+    if (!pileArray || !Array.isArray(pileArray)) return;
+
+    for (let i = pileArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pileArray[i], pileArray[j]] = [pileArray[j], pileArray[i]];
+    }
+}
+
+export function moveRandomCardFromTo(gameState, sourcePileFrom, sourcePileTo, isFaceUp = true) {
+    const randomCard = getRandomCard(gameState, sourcePileFrom);
+
+    if(!randomCard) return;    
+    removeCardFromSource(gameState, randomCard, randomCard.location);
+
+    randomCard.moveToLocation(sourcePileTo);
+    randomCard.setIsFaceUp(isFaceUp);
+
+    if(sourcePileTo === 'graveyard') {
+        gameState.player.graveyard.push(randomCard);
+    } else if (sourcePileTo === 'banish') {
+        gameState.player.banish.push(randomCard);
+    } else {
+        gameState.player.deck.push(randomCard);
+    }
+}
+
+function getRandomCard(gameState, pileName) {
+    const pileArray = gameState.player[pileName];
+    if (!pileArray || pileArray.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * pileArray.length);
+    return pileArray[randomIndex];
 }

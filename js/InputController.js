@@ -6,11 +6,11 @@ import DropboxController from './ui/DropboxController.js';
 import WindowController from './ui/WindowController.js';
 
 export default class InputController {
-    constructor(state/*, renderBoardCallback*/) {
+    constructor(state) {
         this.state = state;
-        //this.renderBoard = renderBoardCallback;
-        
+
         this.activeCardInstance = null;
+        this.activePileLocation = null;
 
         this.isWaitingForMonsterZone = false;
         this.isWaitingForSpellTrapZone = false;
@@ -41,6 +41,7 @@ export default class InputController {
 
     resetInteractionState() {
         this.activeCardInstance = null;
+        this.activePileLocation = null;
     
         this.isWaitingForMonsterZone = false;
         this.isWaitingForSpellTrapZone = false;
@@ -70,17 +71,6 @@ export default class InputController {
             });
         });
     }
-    
-    initDrawButtonListener() {
-        document.getElementById('draw-btn-player').addEventListener('click', () => {
-            if(this.isWaitingForMonsterZone || this.isWaitingForSpellTrapZone){
-                return;
-            }
-    
-            Rules.drawCard(this.state);
-            Renderer.renderBoard(this.state);
-        });
-    }
 
     initCardClickListener() {
         document.getElementById('game-container').addEventListener('click', (event) => {
@@ -103,32 +93,24 @@ export default class InputController {
             const isInsidePlayerDeck = cardSlot.closest('#deck');
             const isInsidePlayerExtraDeck = cardSlot.closest('#extradeck');
 
-            if(isInsidePlayerGraveyard) {
-                Renderer.renderWindow(this.state, 'graveyard');
-                this.windowController.showWindow();
-                return;
-            } else if (isInsidePlayerBanish) {
-                Renderer.renderWindow(this.state, 'banish');
-                this.windowController.showWindow();
-                return;
-            } else if (isInsidePlayerDeck) {
-                Renderer.renderWindow(this.state, 'deck');
-                this.windowController.showWindow();
-                return;
-            } else if (isInsidePlayerExtraDeck) {
-                Renderer.renderWindow(this.state, 'extradeck');
-                this.windowController.showWindow();
-                return;
-            }
+            const isInsidePile = (isInsidePlayerGraveyard || isInsidePlayerBanish || isInsidePlayerDeck || isInsidePlayerExtraDeck);
+            
+            this.clientX = event.clientX;
+            this.clientY = event.clientY;
 
             const instanceId = cardSlot.getAttribute('data-instance-id')
             this.activeCardInstance = this.findCardInstance(instanceId);
-            
+            this.activePileLocation = this.activeCardInstance.location;
+
+            if(isInsidePile) {
+                this.dropboxController.setupDropboxPile(this.activePileLocation);
+                this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-pile');
+                return;
+            }
+
             if(this.activeCardInstance) {
                 console.log(this.activeCardInstance.instanceId);
-                this.dropboxController.setupDropboxes(this.activeCardInstance);
-                this.clientX = event.clientX;
-                this.clientY = event.clientY;              
+                this.dropboxController.setupDropboxes(this.activeCardInstance);              
                 this.dropboxController.showDropbox(this.clientX, this.clientY);
             } 
         });
@@ -236,8 +218,11 @@ export default class InputController {
                 case 'graveyard':
                     Rules.sendCardToGraveyard(this.state, this.activeCardInstance);
                     break;
-                case 'banish':
+                case 'banish-up':
                     Rules.sendCardToBanish(this.state, this.activeCardInstance);
+                    break;
+                case 'banish-down':
+                    Rules.sendCardToBanish(this.state, this.activeCardInstance, false);
                     break;
                 case 'hand':
                     Rules.sendCardToHand(this.state, this.activeCardInstance);
@@ -250,7 +235,7 @@ export default class InputController {
                     break;
             }
             
-            this.hideWindow();
+            //this.hideWindow();
             this.resetInteractionState();
             Renderer.renderBoard(this.state);
         });
@@ -278,6 +263,68 @@ export default class InputController {
             //this.hideWindow();
             this.resetInteractionState();
             Renderer.renderBoard(this.state);
+        });
+    }
+
+    initDropboxPileListener() {
+        this.dropboxController.dropboxPile.addEventListener('click', (event) => {
+            const action = event.target.getAttribute('data-action');
+
+            this.hideAllDropboxes();
+
+            switch (action) {
+                case 'draw':
+                    Rules.drawCard(this.state);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'shuffle':
+                    Rules.shufflePile(this.state, this.activePileLocation);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'mill':
+                    Rules.sendCardToGraveyard(this.state, this.activeCardInstance); 
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'banish-up':
+                    Rules.sendCardToBanish(this.state, this.activeCardInstance); 
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'banish-down':
+                    Rules.sendCardToBanish(this.state, this.activeCardInstance, false);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'view':
+                    event.stopPropagation();
+                    console.log("Right before window render!");
+                    Renderer.renderWindow(this.state, this.activePileLocation);
+                    this.windowController.showWindow();
+                    break;
+                case 'banish-r-up':
+                    Rules.moveRandomCardFromTo(this.state, this.activePileLocation, 'banish', true);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'banish-r-down':
+                    Rules.moveRandomCardFromTo(this.state, this.activePileLocation, 'banish', false);
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'to-gy-r':
+                    Rules.moveRandomCardFromTo(this.state, this.activePileLocation, 'graveyard');
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+                case 'to-deck-r':
+                    Rules.moveRandomCardFromTo(this.state, this.activePileLocation, 'deck');
+                    this.resetInteractionState();
+                    Renderer.renderBoard(this.state);
+                    break;
+            }
         });
     }
 
@@ -365,7 +412,8 @@ export default class InputController {
             
             if(!this.activeCardInstance) return;
 
-            console.log(this.activeCardInstance.instanceId);
+            console.log(`${instanceId} : ${this.activeCardInstance.name} : ${this.activeCardInstance.location}`);
+
             this.dropboxController.setupDropboxes(this.activeCardInstance);
             this.clientX = event.clientX;
             this.clientY = event.clientY;              
@@ -379,9 +427,9 @@ export default class InputController {
             if (!isWindowVisible) return;
 
             const clickedInsideWindow = event.target.closest('#window');
-            const clickedGraveyardBtn = event.target.closest('#graveyard'); 
+            const clickedInsideDropbox = event.target.closest('#dropbox'); 
 
-            if (!clickedInsideWindow && !clickedGraveyardBtn) {
+            if (!clickedInsideWindow && !clickedInsideDropbox) {
                 this.hideWindow();
             }
         });
@@ -389,7 +437,6 @@ export default class InputController {
 
     initListeners() {
         this.initPhaseTrackerListeners();
-        this.initDrawButtonListener();
 
         this.initCardClickListener();
         this.initDropboxListener();
@@ -399,6 +446,7 @@ export default class InputController {
         this.initDropboxSpellTrapListener();
         this.initDropboxSendToListener();
         this.initDropboxSwitchPositionListener();
+        this.initDropboxPileListener();
 
         this.initBoardPlacementListeners();
 
