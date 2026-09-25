@@ -1,4 +1,4 @@
-function removeCardFromSource(gameState, cardInstance, sourceLocation){
+function removeCardFromSource(gameState, cardInstance, sourceLocation = cardInstance.location){
     switch(sourceLocation) {
         case 'hand':
             const handIndex = gameState.player.hand.indexOf(cardInstance);
@@ -22,7 +22,28 @@ function removeCardFromSource(gameState, cardInstance, sourceLocation){
             break;
         case 'monsterZone':
             const monsterZoneIndex = cardInstance.zoneKey;
-            if (monsterZoneIndex) gameState.player.monsterZones[monsterZoneIndex] = null;
+            if (monsterZoneIndex) {
+                const monsterZoneData = gameState.player.monsterZones[monsterZoneIndex];
+
+                if (monsterZoneData.card.instanceId === cardInstance.instanceId) {
+                    if (monsterZoneData.materials && monsterZoneData.materials.length > 0) {
+                        while (monsterZoneData.materials.length > 0) {
+                            const mat = monsterZoneData.materials.pop();
+                            mat.returnToDefault();
+                            mat.moveToLocation('graveyard');
+                            gameState.player.graveyard.push(mat);
+                        }
+                    }
+
+                    gameState.player.monsterZones[monsterZoneIndex] = null; 
+                }
+                else {
+                    const matIndex = monsterZoneData.materials.findIndex(m => m.instanceId === cardInstance.instanceId);
+                    if (matIndex > -1) {
+                        monsterZoneData.materials.splice(matIndex, 1);
+                    }
+                }
+            }
             break;
         case 'spellTrapZone':
             const spellTrapZoneIndex = cardInstance.zoneKey;
@@ -50,7 +71,11 @@ export function summonMonsterCard(gameState, cardInstance, zoneKey){
 
     cardInstance.moveToLocation('monsterZone', zoneKey);
     cardInstance.setIsPositionAttack(true);
-    gameState.player.monsterZones[zoneKey] = cardInstance;
+    
+    gameState.player.monsterZones[zoneKey] = {
+        card: cardInstance,
+        materials: []
+    };
 }
 
 export function setMonsterCard(gameState, cardInstance, zoneKey, isFaceUp){
@@ -59,7 +84,11 @@ export function setMonsterCard(gameState, cardInstance, zoneKey, isFaceUp){
     cardInstance.moveToLocation('monsterZone', zoneKey);
     cardInstance.setIsPositionAttack(false);
     cardInstance.setIsFaceUp(isFaceUp);
-    gameState.player.monsterZones[zoneKey] = cardInstance;
+    
+    gameState.player.monsterZones[zoneKey] = {
+        card: cardInstance,
+        materials: []
+    };
 }
 
 export function activateSpellTrapCard(gameState, cardInstance, zoneKey, isFaceUp){
@@ -140,13 +169,103 @@ export function moveRandomCardFromTo(gameState, sourcePileFrom, sourcePileTo, is
     randomCard.moveToLocation(sourcePileTo);
     randomCard.setIsFaceUp(isFaceUp);
 
-    if(sourcePileTo === 'graveyard') {
+    /*if(sourcePileTo === 'graveyard') {
         gameState.player.graveyard.push(randomCard);
     } else if (sourcePileTo === 'banish') {
         gameState.player.banish.push(randomCard);
     } else {
         gameState.player.deck.push(randomCard);
+    }*/
+
+    const targetArray = gameState.player[sourcePileTo];
+    if (targetArray && Array.isArray(targetArray)) {
+        targetArray.push(randomCard);
     }
+}
+
+export function attachOverlaySummon(gameState, cardInstance, zoneKey, isOverlaying = true) {
+    const zoneData = gameState.player.monsterZones[zoneKey];
+    if  (!zoneData || !zoneData.card || cardInstance.instanceId === zoneData.card.instanceId) return;
+
+    let transferredMaterials = [];
+    if (cardInstance.zoneKey && gameState.player.monsterZones[cardInstance.zoneKey]) {
+        const sourceZoneData = gameState.player.monsterZones[cardInstance.zoneKey];
+        
+        if (sourceZoneData.card && sourceZoneData.card.instanceId === cardInstance.instanceId) {
+            if (sourceZoneData.materials && sourceZoneData.materials.length > 0) {
+                const materialsLength = sourceZoneData.materials.length;
+                for (let i = 0; i < materialsLength; i++) {
+                    const materialCard = sourceZoneData.materials.pop();
+                    transferredMaterials.push(materialCard);
+                }
+            }
+        }
+    }
+
+    removeCardFromSource(gameState, cardInstance);
+    
+    cardInstance.moveToLocation('monsterZone', zoneKey);
+    
+    if(isOverlaying) {
+        const oldTopCard = zoneData.card; 
+        oldTopCard.returnToDefault();
+        oldTopCard.moveToLocation('monsterZone', zoneKey);
+
+        zoneData.card = cardInstance;
+        zoneData.materials.push(oldTopCard);
+    }
+    else {
+        zoneData.materials.push(cardInstance);
+    }
+
+   if (transferredMaterials.length > 0) {
+        transferredMaterials.forEach(mat => {
+            mat.moveToLocation('monsterZone', zoneKey);
+            targetZoneData.materials.push(mat);
+        });
+    }
+}
+
+export function attachCard(gameState, cardInstance, zoneKey) {
+    const zoneData = gameState.player.monsterZones[zoneKey];
+    if  (!zoneData || !zoneData.card || cardInstance.instanceId === zoneData.card.instanceId) return;
+
+    if (cardInstance.zoneKey && gameState.player.monsterZones[cardInstance.zoneKey]) {
+        const sourceZoneData = gameState.player.monsterZones[cardInstance.zoneKey];
+        
+        if (sourceZoneData.card && sourceZoneData.card.instanceId === cardInstance.instanceId) {
+            if (sourceZoneData.materials && sourceZoneData.materials.length > 0) {
+                const materialsLength = sourceZoneData.materials.length;
+                for (let i = 0; i < materialsLength; i++) {
+                    const materialCard = sourceZoneData.materials.pop();
+                    
+                    materialCard.returnToDefault();
+                    materialCard.moveToLocation('monsterZone', zoneKey);
+                    zoneData.materials.push(materialCard);
+                }
+            }
+        }
+    }
+
+    removeCardFromSource(gameState, cardInstance);
+    cardInstance.moveToLocation('monsterZone', zoneKey);
+    zoneData.materials.push(cardInstance);
+}
+
+export function xyzSummon(gameState, cardInstance, zoneKey) {
+    const zoneData = gameState.player.monsterZones[zoneKey];
+    if  (!zoneData || !zoneData.card || cardInstance.instanceId === zoneData.card.instanceId) return;
+
+    removeCardFromSource(gameState, cardInstance);
+    
+    cardInstance.moveToLocation('monsterZone', zoneKey);
+
+    const oldTopCard = zoneData.card; 
+    oldTopCard.returnToDefault();
+    oldTopCard.moveToLocation('monsterZone', zoneKey);
+
+    zoneData.card = cardInstance;
+    zoneData.materials.push(oldTopCard);
 }
 
 function getRandomCard(gameState, pileName) {

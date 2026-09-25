@@ -5,12 +5,16 @@ export default class GameCard {
         this.name = apiCardData.name;
         this.imageUrl = apiCardData.card_images[0].image_url;
         
-        this.location = 'deck'; // 'hand', 'monsterZone', 'graveyard', etc.
-        this.zoneKey = null;    // 'm1', 's3', etc.
-        //this.position = 'attack';
-        this.isPositionAttack = true; // 'attack' or 'defense'
+        this.location = 'deck';
+        this.zoneKey = null;  
+        this.isPositionAttack = true; 
         this.isFaceUp = true;
         this.rawApiData = apiCardData;
+
+        this.type = apiCardData.type;
+
+        this.isMaterial = false;
+        this.isOwnerPlayer = true;
     }
 
     moveToLocation(newLocation, newZoneKey = null){
@@ -26,9 +30,14 @@ export default class GameCard {
         this.isFaceUp = newIsSetUp;
     }
 
+    setIsMaterial(newIsMaterial){
+        this.isMaterial = newIsMaterial;
+    }
+
     returnToDefault(){
         this.zoneKey = null;
         this.isPositionAttack = true;
         this.isFaceUp = true;
+        this.isMaterial = false;
     }
 }

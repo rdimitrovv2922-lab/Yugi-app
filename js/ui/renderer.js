@@ -36,7 +36,8 @@ export function renderExtraDeck(gameState) {
 
 export function renderMonsterZones(gameState) {
     Object.keys(gameState.player.monsterZones).forEach(zoneKey => {
-        const card = gameState.player.monsterZones[zoneKey];
+        const zoneData = gameState.player.monsterZones[zoneKey];
+        
         const faceUpSlot = document.getElementById(zoneKey);
         const setSlot = document.getElementById(`${zoneKey}-set`);
 
@@ -46,7 +47,9 @@ export function renderMonsterZones(gameState) {
         setSlot.removeAttribute('data-instance-id');
         setSlot.classList.remove('full');
 
-        if(!card) return;
+        if (!zoneData || !zoneData.card) return;
+
+        const card = zoneData.card;
 
         if(card.isPositionAttack) {
             const img = document.createElement('img');
@@ -189,8 +192,7 @@ export function renderBanish(gameState) {
     cardSlotBanish.setAttribute('data-instance-id', card.instanceId);
 }
 
-export function renderWindow(gameState, location) {
-    console.log("In window render!");
+export function renderWindow(gameState, cardInstance) {
     const window = document.getElementById('window-container');
     const windowIdentifier = document.getElementById('window-identifier');
     window.innerHTML = '';
@@ -198,7 +200,14 @@ export function renderWindow(gameState, location) {
 
     let target = null;
 
+    const location = cardInstance.location;
+
     switch (location) {
+        case 'monsterZone':
+            windowIdentifier.textContent = "Materials";
+            target = gameState.player.monsterZones[cardInstance.zoneKey].materials;
+            console.log("In monster window render!");
+            break;
         case 'graveyard':
             windowIdentifier.textContent = "Graveyard";
             target = gameState.player.graveyard;
@@ -218,8 +227,7 @@ export function renderWindow(gameState, location) {
             break;
     }
 
-    const countOfCardsInTarget = target.length;
-    if( countOfCardsInTarget === 0 ) return;
+    if (!target || target.length === 0) return;
 
     target.forEach(card => {
         const cardSlot = document.createElement('div');

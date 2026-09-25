@@ -17,4 +17,20 @@ export default class GameState {
     loadDeck(cardArray) {
         this.player.deck = cardArray.map(apiCard => new GameCard(apiCard));
     }
+
+    hasXyzMonsterPresent() {
+        const monsterZones = this.player.monsterZones;
+        if (!monsterZones) return false;
+
+        for (const key of Object.keys(monsterZones)) {
+            const zoneData = monsterZones[key];
+            if (!zoneData) continue;
+
+            if (zoneData.card && zoneData.card.type === 'xyz') {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

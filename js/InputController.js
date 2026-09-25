@@ -14,11 +14,13 @@ export default class InputController {
 
         this.isWaitingForMonsterZone = false;
         this.isWaitingForSpellTrapZone = false;
+        this.isWaitingForAttach = false;
+        this.isWaitingForOverlay = false;
 
         this.isSettingCard = false;
         this.isAttackPosition = true;
 
-        this.dropboxController = new DropboxController();
+        this.dropboxController = new DropboxController(state);
         this.windowController = new WindowController();
 
         this.clientX = null;
@@ -30,12 +32,25 @@ export default class InputController {
     findCardInstance(instanceId) {
         const p = this.state.player;
 
+        const findInMonsterZones = (zones) => {
+            for (const key of Object.keys(zones)) {
+                const zoneData = zones[key];
+                if (!zoneData) continue;
+                if (zoneData.card && zoneData.card.instanceId === instanceId) return zoneData.card;
+                if (zoneData.materials) {
+                    const foundMat = zoneData.materials.find(m => m.instanceId === instanceId);
+                    if (foundMat) return foundMat;
+                }
+            }
+            return null;
+        };
+
         return p.hand.find(c => c.instanceId === instanceId) ||
                p.deck.find(c => c.instanceId === instanceId) ||
                p.extradeck.find(c => c.instanceId === instanceId) ||
                p.graveyard.find(c => c.instanceId === instanceId) ||
                p.banish.find(c => c.instanceId === instanceId) ||
-               Object.values(p.monsterZones).find(c => c !== null && c.instanceId === instanceId) ||
+               findInMonsterZones(p.monsterZones) ||
                Object.values(p.spellTrapZones).find(c => c !== null && c.instanceId === instanceId);
     }
 
@@ -45,6 +60,8 @@ export default class InputController {
     
         this.isWaitingForMonsterZone = false;
         this.isWaitingForSpellTrapZone = false;
+        this.isWaitingForAttach = false;
+        this.isWaitingForOverlay = false;
     
         this.isSettingCard = false;
         this.isAttackPosition = true;
@@ -53,6 +70,12 @@ export default class InputController {
         this.clientY = null;
     
         BoardView.clearHighlightedZones();
+    }
+
+    clearInteractionState() {
+        this.hideAllDropboxes();
+        this.hideWindow();
+        this.resetInteractionState();
     }
 
     hideAllDropboxes() {
@@ -74,6 +97,10 @@ export default class InputController {
 
     initCardClickListener() {
         document.getElementById('game-container').addEventListener('click', (event) => {
+            if (this.isWaitingForAttach || this.isWaitingForOverlay) {
+                return; 
+            }
+
             const cardSlot = event.target.closest('[data-instance-id]');
             if(!cardSlot) return;
 
@@ -84,9 +111,7 @@ export default class InputController {
             if (!isInsidePlayerField && !isInsidePlayerHand && !isInsideExtraMonsterZone) return;
 
             event.stopPropagation();
-            this.hideAllDropboxes();
-            this.hideWindow();
-            this.resetInteractionState();
+            this.clearInteractionState();
 
             const isInsidePlayerGraveyard = cardSlot.closest('#graveyard');
             const isInsidePlayerBanish = cardSlot.closest('#banish');
@@ -102,6 +127,8 @@ export default class InputController {
             this.activeCardInstance = this.findCardInstance(instanceId);
             this.activePileLocation = this.activeCardInstance.location;
 
+            console.log(this.activeCardInstance.type);
+
             if(isInsidePile) {
                 this.dropboxController.setupDropboxPile(this.activePileLocation);
                 this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-pile');
@@ -109,7 +136,6 @@ export default class InputController {
             }
 
             if(this.activeCardInstance) {
-                console.log(this.activeCardInstance.instanceId);
                 this.dropboxController.setupDropboxes(this.activeCardInstance);              
                 this.dropboxController.showDropbox(this.clientX, this.clientY);
             } 
@@ -131,13 +157,12 @@ export default class InputController {
                     this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-spell-trap');
                     break;
                 case 'activate':
-                    console.log(`Card ${this.activeCardInstance.name} has been activated from ${this.activeCardInstance.location}!`);
                     break;
                 case 'send':
                     this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-send-to');
                     break;
                 case 'move':
-                    this.isAttackPosition = this.activeCardInstance.isPositionAttack;
+                    this.isAttackPosition = this.activeCardInstance.isFaceUp && this.activeCardInstance.isPositionAttack;
                     this.isSettingCard = !(this.activeCardInstance.isFaceUp);
                     this.isWaitingForMonsterZone = true;
                     this.isWaitingForSpellTrapZone = true;
@@ -151,6 +176,15 @@ export default class InputController {
                     Rules.flipCard(this.state, this.activeCardInstance);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
+                    break;
+                case 'attach':
+                    this.isWaitingForAttach = true;
+                    BoardView.highlightXYZMonsterZones(this.state);
+                    break;
+                 case 'view':
+                    event.stopPropagation();
+                    Renderer.renderWindow(this.state, this.activeCardInstance);
+                    this.windowController.showWindow();
                     break;
             }
         });
@@ -177,6 +211,14 @@ export default class InputController {
                     this.isAttackPosition = false;
                     this.isSettingCard = false;
                     break
+            }
+            if (action === 'xyz-summon') {
+                this.hideWindow();
+                this.isAttackPosition = true;
+                this.isSettingCard = false;
+                this.isWaitingForOverlay = true;
+                BoardView.highlightFullMonsterZones(this.state);
+                return;
             }
             
             this.hideWindow();
@@ -300,8 +342,7 @@ export default class InputController {
                     break;
                 case 'view':
                     event.stopPropagation();
-                    console.log("Right before window render!");
-                    Renderer.renderWindow(this.state, this.activePileLocation);
+                    Renderer.renderWindow(this.state, this.activeCardInstance);
                     this.windowController.showWindow();
                     break;
                 case 'banish-r-up':
@@ -335,12 +376,11 @@ export default class InputController {
                 this.hideAllDropboxes();
             }
 
-            if (!this.isWaitingForMonsterZone && !this.isWaitingForSpellTrapZone || !this.activeCardInstance) {
+            if ((!this.isWaitingForMonsterZone && !this.isWaitingForSpellTrapZone && !this.isWaitingForAttach && !this.isWaitingForOverlay) || !this.activeCardInstance) {
                 return;
             }
 
-
-            if (this.isWaitingForMonsterZone) {
+            if (this.isWaitingForMonsterZone || this.isWaitingForAttach || this.isWaitingForOverlay) {
                 this.hideWindow();
                 const targetSlot = event.target.closest('.card-slot') || event.target.closest('.set-slot');
 
@@ -348,25 +388,24 @@ export default class InputController {
                     const zoneId = targetSlot.id.replace('-set', '');
                     
                     if (/^m[1-7]$/.test(zoneId)) {
-                        if (this.state.player.monsterZones[zoneId] === null) {
-                            
-                            console.log("Placing card:", {
-                                action: this.activeCardInstance.name,
-                                isAttackPosition: this.isAttackPosition,
-                                isSettingCard: this.isSettingCard
-                            });
+                        const zoneData = this.state.player.monsterZones[zoneId];
 
+                        if (zoneData === null && this.isWaitingForMonsterZone) {
                             if (this.isAttackPosition) {
                                 Rules.summonMonsterCard(this.state, this.activeCardInstance, zoneId);
+                            } else if (this.isSettingCard) {
+                                Rules.setMonsterCard(this.state, this.activeCardInstance, zoneId, false); 
                             } else {
-                                Rules.setMonsterCard(this.state, this.activeCardInstance, zoneId, !this.isSettingCard);
+                                Rules.setMonsterCard(this.state, this.activeCardInstance, zoneId, true); 
                             }
-
-                            this.resetInteractionState();
-                            Renderer.renderBoard(this.state);
-                        } else {
-                            console.warn("That monster zone is already occupied!");
+                        } else if (zoneData && zoneData.card && zoneData.card.type === 'xyz' && this.isWaitingForAttach) {
+                            Rules.attachCard(this.state, this.activeCardInstance, zoneId, false);
+                        } else if (zoneData && zoneData.card && this.isWaitingForOverlay) {
+                            Rules.xyzSummon(this.state, this.activeCardInstance, zoneId, true);
                         }
+
+                        this.resetInteractionState();
+                        Renderer.renderBoard(this.state);
                     }
                 }
             }
@@ -383,8 +422,6 @@ export default class InputController {
                             
                             this.resetInteractionState();
                             Renderer.renderBoard(this.state);
-                        } else {
-                            console.warn("That spell/trap zone is already occupied!");
                         }
                     }
                 }
@@ -399,7 +436,6 @@ export default class InputController {
 
             const isInsideWindow = cardSlot.closest('#window');
             if(!isInsideWindow) {
-                console.log("here");
                 this.hideWindow();
                 return;
             }
@@ -409,10 +445,10 @@ export default class InputController {
 
             const instanceId = cardSlot.getAttribute('data-instance-id')
             this.activeCardInstance = this.findCardInstance(instanceId);
+
+            console.log(this.activeCardInstance.type);
             
             if(!this.activeCardInstance) return;
-
-            console.log(`${instanceId} : ${this.activeCardInstance.name} : ${this.activeCardInstance.location}`);
 
             this.dropboxController.setupDropboxes(this.activeCardInstance);
             this.clientX = event.clientX;

@@ -1,5 +1,5 @@
 export default class DropboxController {
-    constructor() {
+    constructor(gameState) {
         this.dropbox = document.getElementById('dropbox');
         this.dropboxMonster = document.getElementById('dropbox-monster');
         this.dropboxSpellTrap = document.getElementById('dropbox-spell-trap');
@@ -7,6 +7,8 @@ export default class DropboxController {
         this.dropboxSwitchPosition = document.getElementById('dropbox-switch-position');
 
         this.dropboxPile = document.getElementById('dropbox-pile');
+
+        this.state = gameState;
     }
 
     hideAll() {
@@ -46,6 +48,14 @@ export default class DropboxController {
         const allSwitchPositionOptions = this.dropboxSwitchPosition.querySelectorAll('[data-action]');
         allSwitchPositionOptions.forEach(el => el.classList.add('hidden'));
 
+        const xyzSummonOption = this.dropboxMonster.querySelector(`[data-action="xyz-summon"]`);
+        if (xyzSummonOption) xyzSummonOption.classList.add('hidden');
+
+        const attachOption = this.dropbox.querySelector('#attach');
+        if (attachOption && this.state.hasXyzMonsterPresent()) {
+            attachOption.classList.remove('hidden');
+        }
+
         switch(sourceLocation) {
             case 'deck':
             case 'extradeck':
@@ -54,20 +64,41 @@ export default class DropboxController {
                 this.dropbox.querySelector('#monster').classList.remove('hidden');
                 this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
-                if (sourceLocation != 'deck') this.dropbox.querySelector('#activate').classList.remove('hidden');
+                
+                if (sourceLocation !== 'deck') {
+                    this.dropbox.querySelector('#activate').classList.remove('hidden');
+                }
+                
+                if (sourceLocation === 'deck' && attachOption) {
+                    attachOption.classList.add('hidden');
+                }
 
                 this.dropboxSendTo.querySelector(`[data-action="${sourceLocation}"]`).classList.add('hidden');
+                
+                if (sourceLocation === 'extradeck' && activeCardInstance.type === 'xyz') {
+                    if (xyzSummonOption) xyzSummonOption.classList.remove('hidden'); 
+                }
                 break;
+                
             case 'banish':
                 this.dropbox.querySelector('#monster').classList.remove('hidden');
                 this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
                 this.dropbox.querySelector('#activate').classList.remove('hidden');
+                
+                if (attachOption && this.state.hasXyzMonsterPresent()) {
+                    attachOption.classList.remove('hidden');
+                }
 
                 this.dropboxSendTo.querySelector(`[data-action="banish-up"]`).classList.add('hidden');
                 this.dropboxSendTo.querySelector(`[data-action="banish-down"]`).classList.add('hidden');
                 break;
+                
             case 'monsterZone':
+                const zoneData = this.state.player.monsterZones[activeCardInstance.zoneKey]
+                if (zoneData && zoneData.card && zoneData.card.instanceId === activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                    this.dropbox.querySelector('#view').classList.remove('hidden');
+                }
             case 'spellTrapZone':
                 this.dropbox.querySelector('#activate').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');

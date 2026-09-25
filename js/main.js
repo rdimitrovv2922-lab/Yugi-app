@@ -15,8 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializeMockDeck(state, mockCardData, mockBlueEyesData,  40);
 
-    for(let i = 0; i < 15; i++) {
+    for(let i = 0; i < 8; i++) {
         const cardInstance = new GameCard(mockCardDataFusion);
+        cardInstance.moveToLocation('extradeck');
+        state.player.extradeck.push(cardInstance);
+    }
+
+    for(let i = 8; i < 15; i++) {
+        const cardInstance = new GameCard(mockUtopiaData);
         cardInstance.moveToLocation('extradeck');
         state.player.extradeck.push(cardInstance);
     }
@@ -31,19 +37,29 @@ document.addEventListener('DOMContentLoaded', () => {
 const mockCardData = {
     id: 46986414,
     name: "Dark Magician",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/46986414.jpg" }]
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/46986414.jpg" }],
+    type: 'normal'
 };
 
 const mockBlueEyesData = {
     id: 89631139,
     name: "Blue-Eyes White Dragon",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/89631139.jpg" }]
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/89631139.jpg" }],
+    type: 'normal'
+};
+
+const mockUtopiaData = {
+    id: 84013237,
+    name: "Number 39: Utopia",
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/84013237.jpg" }],
+    type: 'xyz'
 };
 
 const mockCardDataFusion = {
     id: 23995346,
     name: "Blue-Eyes Ultimate Dragon",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/23995346.jpg" }]
+    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/23995346.jpg" }],
+    type: 'fusion'
 };
 
 function initializeMockDeck(gameState, cardData, cardData2, count = 40) {
