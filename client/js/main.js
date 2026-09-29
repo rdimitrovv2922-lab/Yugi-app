@@ -1,7 +1,6 @@
 import GameState from './models/GameState.js';
 import GameCard from './models/GameCard.js';
-//import InputController from './ui/InputController.js';
-import InputController from './InputController.js';
+import InputController from './ui/InputController.js';
 import {renderBoard} from './ui/renderer.js';
 import { updatePhaseDisplay } from './ui/PhaseView.js';
 import { drawCard} from './core/GameRules.js';
@@ -13,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputController = new InputController(state);
 
-    initializeMockDeck(state, mockCardData, mockBlueEyesData,  40);
+    initializeMockDeck(state.player, mockCardData, mockBlueEyesData,  40);
+    initializeMockDeck(state.opponent, mockCardData, mockBlueEyesData,  40);
 
     for(let i = 0; i < 8; i++) {
         const cardInstance = new GameCard(mockCardDataFusion);
@@ -27,8 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
         state.player.extradeck.push(cardInstance);
     }
 
+    for(let i = 0; i < 8; i++) {
+        const cardInstance = new GameCard(mockCardDataFusion);
+        cardInstance.moveToLocation('extradeck');
+        state.opponent.extradeck.push(cardInstance);
+    }
+
+    for(let i = 8; i < 15; i++) {
+        const cardInstance = new GameCard(mockUtopiaData);
+        cardInstance.moveToLocation('extradeck');
+        state.opponent.extradeck.push(cardInstance);
+    }
+
     for(let i = 0; i < 5; i++) {
-        drawCard(state);
+        drawCard(state.player);
+        drawCard(state.opponent);
     }
     renderBoard(state);
 });
@@ -62,21 +75,21 @@ const mockCardDataFusion = {
     type: 'fusion'
 };
 
-function initializeMockDeck(gameState, cardData, cardData2, count = 40) {
-    gameState.player.deck = [];
+function initializeMockDeck(playerState, cardData, cardData2, count = 40) {
+    playerState.deck = [];
 
     for (let i = 0; i < count; i++) {
         if(i%2 === 0) {
             const cardInstance = new GameCard(cardData);
             cardInstance.moveToLocation('deck');
-            gameState.player.deck.push(cardInstance);
+            playerState.deck.push(cardInstance);
         }
         else {
             const cardInstance = new GameCard(cardData2);
             cardInstance.moveToLocation('deck');
-            gameState.player.deck.push(cardInstance);
+            playerState.deck.push(cardInstance);
         }
     }
-    console.log(`Initialized deck with ${gameState.player.deck.length} cards.`);
+    console.log(`Initialized deck with ${playerState.deck.length} cards.`);
 }
 // Mock for testing ------------------------------------------------------------------------- //

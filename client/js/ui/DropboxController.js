@@ -46,7 +46,10 @@ export default class DropboxController {
         allSendToOptions.forEach(el => el.classList.remove('hidden'));
 
         const allSwitchPositionOptions = this.dropboxSwitchPosition.querySelectorAll('[data-action]');
-        allSwitchPositionOptions.forEach(el => el.classList.add('hidden'));
+        allSwitchPositionOptions.forEach(el => el.classList.remove('hidden'));
+
+        const allMonsterOptions = this.dropboxMonster.querySelectorAll('[data-action]');
+        allMonsterOptions.forEach(el => el.classList.remove('hidden'));
 
         const xyzSummonOption = this.dropboxMonster.querySelector(`[data-action="xyz-summon"]`);
         if (xyzSummonOption) xyzSummonOption.classList.add('hidden');
@@ -57,8 +60,13 @@ export default class DropboxController {
         }
 
         switch(sourceLocation) {
-            case 'deck':
             case 'extradeck':
+                if (activeCardInstance.type === 'xyz') {
+                    if (xyzSummonOption) xyzSummonOption.classList.remove('hidden'); 
+                }
+                this.dropboxMonster.querySelector(`[data-action="normal-summon"]`).classList.add('hidden');
+                this.dropboxMonster.querySelector(`[data-action="set"]`).classList.add('hidden');
+            case 'deck':
             case 'hand':
             case 'graveyard':
                 this.dropbox.querySelector('#monster').classList.remove('hidden');
@@ -68,57 +76,46 @@ export default class DropboxController {
                 if (sourceLocation !== 'deck') {
                     this.dropbox.querySelector('#activate').classList.remove('hidden');
                 }
-                
-                if (sourceLocation === 'deck' && attachOption) {
-                    attachOption.classList.add('hidden');
-                }
 
                 this.dropboxSendTo.querySelector(`[data-action="${sourceLocation}"]`).classList.add('hidden');
-                
-                if (sourceLocation === 'extradeck' && activeCardInstance.type === 'xyz') {
-                    if (xyzSummonOption) xyzSummonOption.classList.remove('hidden'); 
-                }
-                break;
-                
+                break;       
             case 'banish':
                 this.dropbox.querySelector('#monster').classList.remove('hidden');
                 this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
                 this.dropbox.querySelector('#activate').classList.remove('hidden');
-                
-                if (attachOption && this.state.hasXyzMonsterPresent()) {
-                    attachOption.classList.remove('hidden');
-                }
 
                 this.dropboxSendTo.querySelector(`[data-action="banish-up"]`).classList.add('hidden');
                 this.dropboxSendTo.querySelector(`[data-action="banish-down"]`).classList.add('hidden');
                 break;
-                
             case 'monsterZone':
+                this.dropbox.querySelector('#activate').classList.remove('hidden');
+                this.dropbox.querySelector('#send').classList.remove('hidden');
+                this.dropbox.querySelector('#move').classList.remove('hidden');
+
                 const zoneData = this.state.player.monsterZones[activeCardInstance.zoneKey]
                 if (zoneData && zoneData.card && zoneData.card.instanceId === activeCardInstance.instanceId && zoneData.materials.length > 0) {
                     this.dropbox.querySelector('#view').classList.remove('hidden');
+                } else if (zoneData.card && zoneData.card.instanceId != activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                    this.dropbox.querySelector('#activate').classList.add('hidden');
+                    break;
                 }
+
+                this.dropbox.querySelector('#switch').classList.remove('hidden');
+                if (activeCardInstance.isPositionAttack) {
+                    this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.add('hidden');
+                } else if (activeCardInstance.isFaceUp) {
+                    this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.add('hidden');
+                } else {
+                    this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.add('hidden');
+                }
+                break;   
             case 'spellTrapZone':
                 this.dropbox.querySelector('#activate').classList.remove('hidden');
                 this.dropbox.querySelector('#send').classList.remove('hidden');
                 this.dropbox.querySelector('#move').classList.remove('hidden');
 
-                if (sourceLocation === 'spellTrapZone') {
-                    this.dropbox.querySelector('[data-action="flip"]').classList.remove('hidden');
-                } else if (activeCardInstance.isPositionAttack) {
-                    this.dropbox.querySelector('#switch').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.remove('hidden');
-                } else if (activeCardInstance.isFaceUp) {
-                    this.dropbox.querySelector('#switch').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.remove('hidden');
-                } else {
-                    this.dropbox.querySelector('#switch').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.remove('hidden');
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.remove('hidden');
-                }
+                this.dropbox.querySelector('[data-action="flip"]').classList.remove('hidden');
                 break;   
         }
     }

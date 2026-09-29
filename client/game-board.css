@@ -45,15 +45,6 @@ body {
     gap: 0px;
 }
 
-/*.game-container-right {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    justify-content: flex-start;
-    align-items: center;
-    align-self: flex-start;
-}*/
-
 .player-info-box {
     display: flex;
     flex-direction: column;
@@ -72,6 +63,28 @@ body {
 .player-lp {
     font-size: 16px;
     font-style: italic;
+}
+
+.end-turn-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 40px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 8px;
+    background-color: #333333;
+    border-radius: 5px;
+    border: 1px solid #FFFFFF;
+    text-align: center;
+    
+    color:#FFFFFF;
+    cursor: default;
+}
+
+.end-turn-button:hover {
+    background-color: #666666;
 }
 
 #turn-indicator {
@@ -231,8 +244,13 @@ body {
     transition: transform 0.3s ease, z-index 0.3s ease  
 }
 
-.hand-container .card-slot:hover {
+#player-hand .card-slot:hover {
     transform: translateY(-20px) scale(1.1); 
+    z-index: 999;
+}
+
+#op-hand .card-slot:hover {
+    transform: translateY(20px) scale(1.1); 
     z-index: 999;
 }
 

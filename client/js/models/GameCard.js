@@ -13,6 +13,8 @@ export default class GameCard {
 
         this.type = apiCardData.type;
 
+        this.isVisibleToOpponent = false;
+
         this.isMaterial = false;
         this.isOwnerPlayer = true;
     }
@@ -34,10 +36,15 @@ export default class GameCard {
         this.isMaterial = newIsMaterial;
     }
 
+    changeVisibility(newIsVisibleToOpponent) {
+        this.isVisibleToOpponent = newIsVisibleToOpponent;
+    }
+
     returnToDefault(){
         this.zoneKey = null;
         this.isPositionAttack = true;
         this.isFaceUp = true;
         this.isMaterial = false;
+        this.isVisibleToOpponent = false;
     }
 }

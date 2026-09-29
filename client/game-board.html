@@ -12,6 +12,10 @@
                 <span>Turn</span>
                 <span id="turn-number">1</span>
             </div>
+
+            <div id="end-turn">
+                <div class="end-turn-button">End Turn</div>
+            </div>
             
             <div id="phase-tracker">
                 <div class="phase" data-phase="DP">DP</div>
@@ -29,70 +33,68 @@
         </div>
 
         <div class="game-container-center">
-            <div id="opponent-hand" class="hand-container">
+            <div id="op-hand" class="hand-container">
             </div>
 
             <div id="opponent-field" class="field-container">
                 <div class="left-zones">
                     <div class="deck-zone">
-                        <div class="card-slot deck">
-                            <button id="draw-btn-opponent">Draw Card</button>
-                        </div>
+                        <div id="op-deck" class="card-slot deck"></div>
                     </div>
 
                     <div class="graveyard-zone">
-                        <div class="card-slot graveyard"></div>
+                        <div id="op-graveyard" class="card-slot graveyard"></div>
                     </div>
 
                     <div class="banished-zone">
-                        <div class="card-slot banished"></div>
+                        <div id="op-banish" class="card-slot banished"></div>
                     </div>
                 </div>
                 
                 <div class="middle-zones">
                     <div class="spell-zone">
-                        <div class="card-slot pendulum-right"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot"></div>
-                        <div class="card-slot pendulum-left"></div>
+                        <div id="op-s1" class="card-slot pendulum-right"></div>
+                        <div id="op-s2" class="card-slot"></div>
+                        <div id="op-s3" class="card-slot"></div>
+                        <div id="op-s4" class="card-slot"></div>
+                        <div id="op-s5" class="card-slot pendulum-left"></div>
                     </div>
 
                     <div class="monster-zone">
                         <div class="monster-slot-wrapper"> 
-                            <div id="opm1" class="card-slot" data-index="1"></div>
-                            <div id="opm1-set" class="set-slot" data-index="1"></div>
+                            <div id="op-m1" class="card-slot" data-index="1"></div>
+                            <div id="op-m1-set" class="set-slot" data-index="1"></div>
                         </div>
 
                         <div class="monster-slot-wrapper">
-                            <div id="opm2" class="card-slot" data-index="2"></div>
-                            <div id="opm2-set" class="set-slot" data-index="2"></div>
+                            <div id="op-m2" class="card-slot" data-index="2"></div>
+                            <div id="op-m2-set" class="set-slot" data-index="2"></div>
                         </div>
 
                         <div class="monster-slot-wrapper"> 
-                            <div id="opm3" class="card-slot" data-index="3"></div>
-                            <div id="opm3-set" class="set-slot" data-index="3"></div>
+                            <div id="op-m3" class="card-slot" data-index="3"></div>
+                            <div id="op-m3-set" class="set-slot" data-index="3"></div>
                         </div>
 
                         <div class="monster-slot-wrapper"> 
-                            <div id="opm4" class="card-slot" data-index="4"></div>
-                            <div id="opm4-set" class="set-slot" data-index="4"></div>
+                            <div id="op-m4" class="card-slot" data-index="4"></div>
+                            <div id="op-m4-set" class="set-slot" data-index="4"></div>
                         </div>
 
                         <div class="monster-slot-wrapper"> 
-                            <div id="opm5" class="card-slot" data-index="5"></div>
-                            <div id="opm5-set" class="set-slot" data-index="5"></div>
+                            <div id="op-m5" class="card-slot" data-index="5"></div>
+                            <div id="op-m5-set" class="set-slot" data-index="5"></div>
                         </div>
                     </div>
                 </div>   
                 
                 <div class="right-zones">
                     <div class="extra-deck-zone">
-                        <div class="card-slot deck extra-deck"></div>
+                        <div id="op-extradeck" class="card-slot deck extra-deck"></div>
                     </div>
 
                     <div class="field-zone">
-                        <div class="card-slot"></div>
+                        <div id="op-s6" class="card-slot"></div>
                     </div>
                     
                     <div class="empty-zone">
@@ -244,11 +246,6 @@
         <div class="dropbox-item" data-action="to-atk">Switch to Atk</div>
         <div class="dropbox-item" data-action="to-def">Switch to Def</div>
         <div class="dropbox-item" data-action="to-set">Switch to Set</div>
-    </div>
-
-    <div id="dropbox-attach-overlay" class="dropbox hidden">
-        <div class="dropbox-item" data-action="attach">Attach</div>
-        <div class="dropbox-item" data-action="overlay">Overlay</div>
     </div>
 
     <div id="dropbox-pile" class="dropbox hidden">

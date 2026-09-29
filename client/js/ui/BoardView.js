@@ -6,7 +6,7 @@ export function highlightValidMonsterZones(state, isSetting) {
         const zoneKey = `m${i}`;
         const zoneData = state.player.monsterZones[zoneKey];
 
-        if (zoneData === null) {
+        if (zoneData.card === null) {
             const targetDom = document.getElementById(isSetting ? `${zoneKey}-set` : zoneKey);
             if (targetDom) targetDom.classList.add('valid-target');
         }
@@ -18,8 +18,7 @@ export function highlightXYZMonsterZones(state) {
         const zoneKey = `m${i}`;
         const zoneData = state.player.monsterZones[zoneKey];
 
-        if (zoneData && zoneData.card) {
-            
+        if (zoneData.card) {
             if (zoneData.card.type === 'xyz') {
                 
                 const domId = zoneData.card.isPositionAttack ? zoneKey : `${zoneKey}-set`;
@@ -38,7 +37,7 @@ export function highlightFullMonsterZones(state) {
         const zoneKey = `m${i}`;
         const zoneData = state.player.monsterZones[zoneKey];
 
-        if (zoneData && zoneData.card) {
+        if (zoneData.card) {
              
             const domId = zoneData.card.isPositionAttack ? zoneKey : `${zoneKey}-set`;
             const targetDom = document.getElementById(domId);
