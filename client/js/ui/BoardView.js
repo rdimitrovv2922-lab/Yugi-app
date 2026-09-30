@@ -1,12 +1,24 @@
 const MAX_MONSTERS = 7;
+const MAX_EXTRAMONSTERS = 2;
 const MAX_SPELLS = 6;
 
 export function highlightValidMonsterZones(state, isSetting) {
-    for (let i = 1; i <= MAX_MONSTERS; i++) {
+    for (let i = 1; i <= MAX_MONSTERS - MAX_EXTRAMONSTERS; i++) {
         const zoneKey = `m${i}`;
         const zoneData = state.player.monsterZones[zoneKey];
 
         if (zoneData.card === null) {
+            const targetDom = document.getElementById(isSetting ? `${zoneKey}-set` : zoneKey);
+            if (targetDom) targetDom.classList.add('valid-target');
+        }
+    }
+
+    for (let i = MAX_MONSTERS - MAX_EXTRAMONSTERS + 1; i <= MAX_MONSTERS; i++) {
+        const zoneKey = `m${i}`;
+        const zoneData = state.player.monsterZones[zoneKey];
+        const zoneDataOpp = state.opponent.monsterZones[zoneKey];
+
+        if (zoneData.card === null && zoneDataOpp.card === null) {
             const targetDom = document.getElementById(isSetting ? `${zoneKey}-set` : zoneKey);
             if (targetDom) targetDom.classList.add('valid-target');
         }

@@ -2,9 +2,11 @@ import GameCard from "./GameCard.js";
 
 export default class GameState {
     constructor() {
+        this.turn = 'player1';
+        
         this.player = {
             lp: 8000,
-            deck: [],
+            deck: [], 
             extradeck: [],
             graveyard: [],
             banish: [],

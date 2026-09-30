@@ -1,4 +1,4 @@
-import * as Rules from '../core/GameRules.js';
+//import * as Rules from '../core/GameRules.js';
 import * as Renderer from './renderer.js';
 import * as PhaseView from './PhaseView.js';
 import * as BoardView from './BoardView.js';
@@ -27,6 +27,26 @@ export default class InputController {
         this.clientY = null;
 
         this.initListeners();
+    }
+
+    runRule(ruleName, ...args) {
+        const sessionId = sessionStorage.getItem('yugiSessionId');
+        const serializedArgs = args.map(argument =>
+            argument && typeof argument === 'object' && argument.instanceId
+                ? { instanceId: argument.instanceId }
+                : argument
+        );
+
+        fetch('/api/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, ruleName, args: serializedArgs })
+        })
+            .then(async response => {
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error);
+            })
+            .catch(error => console.error(`${ruleName} failed:`, error));
     }
 
     findCardInstance(instanceId) {
@@ -130,6 +150,7 @@ export default class InputController {
             console.log(this.activeCardInstance.type);
 
             if(isInsidePile) {
+                console.log(this.activeCardInstance.location);
                 this.dropboxController.setupDropboxPile(this.activePileLocation);
                 this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-pile');
                 return;
@@ -173,7 +194,8 @@ export default class InputController {
                     this.dropboxController.showDropbox(this.clientX, this.clientY, 'dropbox-switch-position');
                     break;
                 case 'flip':
-                    Rules.flipCard(this.state.player, this.activeCardInstance);
+                    //Rules.flipCard(this.state.player, this.activeCardInstance);
+                    this.runRule('flipCard', this.activeCardInstance);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
@@ -258,22 +280,28 @@ export default class InputController {
 
             switch (action) {
                 case 'graveyard':
-                    Rules.sendCardToGraveyard(this.state.player, this.activeCardInstance);
+                    //Rules.sendCardToGraveyard(this.state.player, this.activeCardInstance);
+                    this.runRule('sendCardToGraveyard', this.activeCardInstance);
                     break;
                 case 'banish-up':
-                    Rules.sendCardToBanish(this.state.player, this.activeCardInstance);
+                    //Rules.sendCardToBanish(this.state.player, this.activeCardInstance);
+                    this.runRule('sendCardToBanish', this.activeCardInstance);
                     break;
                 case 'banish-down':
-                    Rules.sendCardToBanish(this.state.player, this.activeCardInstance, false);
+                    //Rules.sendCardToBanish(this.state.player, this.activeCardInstance, false);
+                    this.runRule('sendCardToBanish', this.activeCardInstance, false);
                     break;
                 case 'hand':
-                    Rules.sendCardToHand(this.state.player, this.activeCardInstance);
+                    //Rules.sendCardToHand(this.state.player, this.activeCardInstance);
+                    this.runRule('sendCardToHand', this.activeCardInstance);
                     break;
                 case 'deck':
-                    Rules.sendCardToDeck(this.state.player, this.activeCardInstance);
+                    //Rules.sendCardToDeck(this.state.player, this.activeCardInstance);
+                    this.runRule('sendCardToDeck', this.activeCardInstance);
                     break
                 case 'extradeck':
-                    Rules.sendCardToExtraDeck(this.state.player, this.activeCardInstance);
+                    //Rules.sendCardToExtraDeck(this.state.player, this.activeCardInstance);
+                    this.runRule('sendCardToExtraDeck', this.activeCardInstance);
                     break;
             }
             
@@ -291,13 +319,16 @@ export default class InputController {
 
             switch (action) {
                 case 'to-atk':
-                    Rules.switchBattlePositionToAtk(this.state.player, this.activeCardInstance);
+                    //Rules.switchBattlePositionToAtk(this.state.player, this.activeCardInstance);
+                    this.runRule('switchBattlePositionToAtk', this.activeCardInstance);
                     break;
                 case 'to-def':
-                    Rules.switchBattlePositionToDef(this.state.player, this.activeCardInstance, true);
+                    //Rules.switchBattlePositionToDef(this.state.player, this.activeCardInstance, true);
+                    this.runRule('switchBattlePositionToDef', this.activeCardInstance, true);
                     break;
                 case 'to-set':
-                    Rules.switchBattlePositionToDef(this.state.player, this.activeCardInstance, false);
+                    //Rules.switchBattlePositionToDef(this.state.player, this.activeCardInstance, false);
+                    this.runRule('switchBattlePositionToDef', this.activeCardInstance, false);
                     break;
             }
 
@@ -313,28 +344,32 @@ export default class InputController {
             this.hideAllDropboxes();
 
             switch (action) {
-                case 'draw':
-                    Rules.drawCard(this.state.player);
+                case 'draw':{
+                    this.runRule('drawCard');
                     this.resetInteractionState();
-                    Renderer.renderBoard(this.state);
                     break;
+                }
                 case 'shuffle':
-                    Rules.shufflePile(this.state.player, this.activePileLocation);
+                    //Rules.shufflePile(this.state.player, this.activePileLocation);
+                    this.runRule('shufflePile', this.activePileLocation);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'mill':
-                    Rules.sendCardToGraveyard(this.state.player, this.activeCardInstance); 
+                    //Rules.sendCardToGraveyard(this.state.player, this.activeCardInstance); 
+                    this.runRule('sendCardToGraveyard', this.activeCardInstance);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'banish-up':
-                    Rules.sendCardToBanish(this.state.player, this.activeCardInstance); 
+                    //Rules.sendCardToBanish(this.state.player, this.activeCardInstance); 
+                    this.runRule('sendCardToBanish', this.activeCardInstance);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'banish-down':
-                    Rules.sendCardToBanish(this.state.player, this.activeCardInstance, false);
+                    //Rules.sendCardToBanish(this.state.player, this.activeCardInstance, false);
+                    this.runRule('sendCardToBanish', this.activeCardInstance, false);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
@@ -344,22 +379,26 @@ export default class InputController {
                     this.windowController.showWindow();
                     break;
                 case 'banish-r-up':
-                    Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'banish', true);
+                    //Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'banish', true);
+                    this.runRule('moveRandomCardFromTo', this.activePileLocation, 'banish', true);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'banish-r-down':
-                    Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'banish', false);
+                    //Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'banish', false);
+                    this.runRule('moveRandomCardFromTo', this.activePileLocation, 'banish', false);
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'to-gy-r':
-                    Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'graveyard');
+                    //Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'graveyard');
+                    this.runRule('moveRandomCardFromTo', this.activePileLocation, 'graveyard');
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
                 case 'to-deck-r':
-                    Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'deck');
+                    //Rules.moveRandomCardFromTo(this.state.player, this.activePileLocation, 'deck');
+                    this.runRule('moveRandomCardFromTo', this.activePileLocation, 'deck');
                     this.resetInteractionState();
                     Renderer.renderBoard(this.state);
                     break;
@@ -391,16 +430,21 @@ export default class InputController {
 
                         if (zoneData.card === null && this.isWaitingForMonsterZone) {
                             if (this.isAttackPosition) {
-                                Rules.summonMonsterCard(this.state.player, this.activeCardInstance, zoneId);
+                                //Rules.summonMonsterCard(this.state.player, this.activeCardInstance, zoneId);
+                                this.runRule('summonMonsterCard', this.activeCardInstance, zoneId);
                             } else if (this.isSettingCard) {
-                                Rules.setMonsterCard(this.state.player, this.activeCardInstance, zoneId, false); 
+                                //Rules.setMonsterCard(this.state.player, this.activeCardInstance, zoneId, false);
+                                this.runRule('setMonsterCard', this.activeCardInstance, zoneId, false); 
                             } else {
-                                Rules.setMonsterCard(this.state.player, this.activeCardInstance, zoneId, true); 
+                                //Rules.setMonsterCard(this.state.player, this.activeCardInstance, zoneId, true); 
+                                this.runRule('setMonsterCard', this.activeCardInstance, zoneId, true);
                             }
                         } else if (zoneData && zoneData.card.type === 'xyz' && this.isWaitingForAttach) {
-                            Rules.attachCard(this.state.player, this.activeCardInstance, zoneId);
+                            //Rules.attachCard(this.state.player, this.activeCardInstance, zoneId);
+                            this.runRule('attachCard', this.activeCardInstance, zoneId);
                         } else if (zoneData && this.isWaitingForOverlay) {
-                            Rules.xyzSummon(this.state.player, this.activeCardInstance, zoneId);
+                            //Rules.xyzSummon(this.state.player, this.activeCardInstance, zoneId);
+                            this.runRule('xyzSummon', this.activeCardInstance, zoneId);
                         }
 
                         this.resetInteractionState();
@@ -417,7 +461,8 @@ export default class InputController {
                     const zoneId = targetSlot.id;
                     if (/^s[1-6]$/.test(zoneId)) {
                         if (this.state.player.spellTrapZones[zoneId] === null) {
-                            Rules.activateSpellTrapCard(this.state.player, this.activeCardInstance, zoneId, !this.isSettingCard);
+                            //Rules.activateSpellTrapCard(this.state.player, this.activeCardInstance, zoneId, !this.isSettingCard);
+                            this.runRule('activateSpellTrapCard', this.activeCardInstance, zoneId, !this.isSettingCard);
                             
                             this.resetInteractionState();
                             Renderer.renderBoard(this.state);

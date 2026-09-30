@@ -42,22 +42,30 @@ export function renderOpponentMonsterZones(gameState) {
     Object.keys(gameState.opponent.monsterZones).forEach(zoneKey => {
         const zoneData = gameState.opponent.monsterZones[zoneKey];
 
-        let faceUpId = `op-${zoneKey}`;
-        let setId = `op-${zoneKey}-set`;
+        let faceUpId = null;
+        let setId = null;
+        let isReverse = false;
 
-        if (zoneKey === 'm6' && gameState.opponent.monsterZones['m6'].card)
-        {
-            faceUpId = 'm6';
-            setId = 'm6-set'; 
-        } else if (zoneKey === 'm7' && gameState.opponent.monsterZones['m7'].card) { 
-            faceUpId = 'm7'; 
-            setId = 'm7-set'; 
-        } 
+        if (zoneKey === 'm6') {
+            if (gameState.opponent.monsterZones['m6'].card) {
+                faceUpId = 'm6';
+                setId = 'm6-set';
+                isReverse = true;
+            } else return;
+        } else if (zoneKey === 'm7') {
+            if (gameState.opponent.monsterZones['m7'].card) {
+                faceUpId = 'm7'; 
+                setId = 'm7-set'; 
+                isReverse = true;
+            }
+            else return;
+        } else {
+            faceUpId = `op-${zoneKey}`;
+            setId = `op-${zoneKey}-set`;
+        }
         
         const faceUpSlot = document.getElementById(faceUpId);
         const setSlot = document.getElementById(setId);
-
-        if(!gameState.opponent.monsterZones[zoneKey].card) return;
 
         faceUpSlot.innerHTML = '';
         setSlot.innerHTML = '';
@@ -75,6 +83,8 @@ export function renderOpponentMonsterZones(gameState) {
             img.alt = card.name;
             faceUpSlot.appendChild(img);
             faceUpSlot.setAttribute('data-instance-id', card.instanceId);
+
+            if(isReverse) faceUpSlot.classList.add('reverse');
         } else {
             const img = document.createElement('img');
 
@@ -90,6 +100,8 @@ export function renderOpponentMonsterZones(gameState) {
             setSlot.appendChild(img);
             setSlot.setAttribute('data-instance-id', card.instanceId);
             setSlot.classList.add('full');
+
+            if(isReverse) setSlot.classList.add('reverse');
         }
     });
 }

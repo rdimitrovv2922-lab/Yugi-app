@@ -90,6 +90,7 @@ body {
 #turn-indicator {
     font-size: 20px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 10px;
@@ -319,7 +320,7 @@ body {
 }
 
 .dropbox {
-     position: fixed;
+    position: fixed;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -411,4 +412,9 @@ body {
     min-width: 40px;
     aspect-ratio: 1 / 1.45;
     flex-shrink: 0;
+}
+
+.reverse {
+    transform: rotate(180deg);
+    transform-origin: center center;
 }

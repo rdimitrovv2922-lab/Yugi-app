@@ -3,93 +3,101 @@ import GameCard from './models/GameCard.js';
 import InputController from './ui/InputController.js';
 import {renderBoard} from './ui/renderer.js';
 import { updatePhaseDisplay } from './ui/PhaseView.js';
-import { drawCard} from './core/GameRules.js';
+
+function restoreCards(value) {
+    if (Array.isArray(value)) {
+        return value.map(restoreCards);
+    }
+
+    if (!value || typeof value !== 'object') {
+        return value;
+    }
+
+    if (value.instanceId && value.rawApiData) {
+        return Object.assign(new GameCard(value.rawApiData), value);
+    }
+
+    return Object.fromEntries(
+        Object.entries(value).map(([key, item]) => [key, restoreCards(item)])
+    );
+}
 
 const state = new GameState();
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const roomId = new URLSearchParams(location.search).get('room') || 'demo';
+    const joinResponse = await fetch(`/api/join?room=${encodeURIComponent(roomId)}`);
+    const joinInfo = await joinResponse.json();
+
+    if (!joinResponse.ok) {
+        console.error('Could not join room:', joinInfo.error);
+        return;
+    }
+
+    sessionStorage.setItem('yugiSessionId', joinInfo.sessionId);
+    sessionStorage.setItem('yugiRole', joinInfo.role);
+    console.log(`Joined room ${roomId} as ${joinInfo.role}`);
+
+    document.querySelector('.end-turn-button').addEventListener('click', async () => {
+        const sessionId = sessionStorage.getItem('yugiSessionId');
+        const response = await fetch(
+            `/api/end-turn?sessionId=${encodeURIComponent(sessionId)}`,
+            { method: 'POST' }
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+            console.error('Action rejected:', result.error);
+            return;
+        }
+
+        console.log('Server accepted end turn. Shared state:', result);
+    });
+
+    const turnLabel = document.getElementById('turn-number');
+    let currentTurn = null;
+
+    let lastSnapshot = null;
+
+    async function refreshTurn() {
+        const response = await fetch(
+            `/api/state?room=${encodeURIComponent(roomId)}`
+        );
+
+        if (!response.ok) return;
+
+        const gameState = await response.json();
+
+        const snapshot = JSON.stringify(gameState);
+
+        if (snapshot !== lastSnapshot) {
+            lastSnapshot = snapshot;
+
+            const ownSide = joinInfo.role === 'player1'
+                ? gameState.player
+                : gameState.opponent;
+            const otherSide = joinInfo.role === 'player1'
+                ? gameState.opponent
+                : gameState.player;
+
+            state.player = restoreCards(ownSide);
+            state.opponent = restoreCards(otherSide);
+            renderBoard(state);
+        }
+
+        if (gameState.turn !== currentTurn) {
+            currentTurn = gameState.turn;
+            turnLabel.textContent =
+                currentTurn === joinInfo.role ? 'You' : 'Opponent';
+        }
+    }
+
+    await refreshTurn();
+    setInterval(() => {
+        refreshTurn().catch(error => console.error('Could not refresh turn:', error));
+    }, 1000);
+    
     updatePhaseDisplay('DP');
-
     const inputController = new InputController(state);
-
-    initializeMockDeck(state.player, mockCardData, mockBlueEyesData,  40);
-    initializeMockDeck(state.opponent, mockCardData, mockBlueEyesData,  40);
-
-    for(let i = 0; i < 8; i++) {
-        const cardInstance = new GameCard(mockCardDataFusion);
-        cardInstance.moveToLocation('extradeck');
-        state.player.extradeck.push(cardInstance);
-    }
-
-    for(let i = 8; i < 15; i++) {
-        const cardInstance = new GameCard(mockUtopiaData);
-        cardInstance.moveToLocation('extradeck');
-        state.player.extradeck.push(cardInstance);
-    }
-
-    for(let i = 0; i < 8; i++) {
-        const cardInstance = new GameCard(mockCardDataFusion);
-        cardInstance.moveToLocation('extradeck');
-        state.opponent.extradeck.push(cardInstance);
-    }
-
-    for(let i = 8; i < 15; i++) {
-        const cardInstance = new GameCard(mockUtopiaData);
-        cardInstance.moveToLocation('extradeck');
-        state.opponent.extradeck.push(cardInstance);
-    }
-
-    for(let i = 0; i < 5; i++) {
-        drawCard(state.player);
-        drawCard(state.opponent);
-    }
     renderBoard(state);
 });
-
-// Mock for testing ------------------------------------------------------------------------- //
-const mockCardData = {
-    id: 46986414,
-    name: "Dark Magician",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/46986414.jpg" }],
-    type: 'normal'
-};
-
-const mockBlueEyesData = {
-    id: 89631139,
-    name: "Blue-Eyes White Dragon",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/89631139.jpg" }],
-    type: 'normal'
-};
-
-const mockUtopiaData = {
-    id: 84013237,
-    name: "Number 39: Utopia",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/84013237.jpg" }],
-    type: 'xyz'
-};
-
-const mockCardDataFusion = {
-    id: 23995346,
-    name: "Blue-Eyes Ultimate Dragon",
-    card_images: [{ image_url: "https://images.ygoprodeck.com/images/cards/23995346.jpg" }],
-    type: 'fusion'
-};
-
-function initializeMockDeck(playerState, cardData, cardData2, count = 40) {
-    playerState.deck = [];
-
-    for (let i = 0; i < count; i++) {
-        if(i%2 === 0) {
-            const cardInstance = new GameCard(cardData);
-            cardInstance.moveToLocation('deck');
-            playerState.deck.push(cardInstance);
-        }
-        else {
-            const cardInstance = new GameCard(cardData2);
-            cardInstance.moveToLocation('deck');
-            playerState.deck.push(cardInstance);
-        }
-    }
-    console.log(`Initialized deck with ${playerState.deck.length} cards.`);
-}
-// Mock for testing ------------------------------------------------------------------------- //

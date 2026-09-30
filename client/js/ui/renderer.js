@@ -42,25 +42,31 @@ export function renderMonsterZones(gameState) {
 
         let faceUpId = zoneKey;
         let setId = `${zoneKey}-set`;
+        let isReverse = false;
 
         if (zoneKey === 'm6' && gameState.player.monsterZones['m6'].card) {
             faceUpId = 'm6';
             setId = 'm6-set'; 
+            isReverse = true;
         } else if (zoneKey === 'm7' && gameState.player.monsterZones['m7'].card) { 
             faceUpId = 'm7'; 
             setId = 'm7-set'; 
+            isReverse = true;
         }
         
         const faceUpSlot = document.getElementById(faceUpId);
         const setSlot = document.getElementById(setId);
-
-        //if(!gameState.player.monsterZones[zoneKey].card) return;
 
         faceUpSlot.innerHTML = '';
         setSlot.innerHTML = '';
         faceUpSlot.removeAttribute('data-instance-id');
         setSlot.removeAttribute('data-instance-id');
         setSlot.classList.remove('full');
+
+        if (isReverse){
+            setSlot.classList.remove('reverse');
+            faceUpSlot.classList.remove('reverse');
+        }
 
         if (!zoneData || !zoneData.card) return;
 
