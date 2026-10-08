@@ -2,6 +2,27 @@ export const CARD_BACK_URL = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixm
 
 import { updateHandContainerVisuals } from './renderer.js';
 
+const mirrorZoneKey = (zoneKey) => {
+    const map = {
+        's1': 's5',
+        's2': 's4',
+        's3': 's3',
+        's4': 's2',
+        's5': 's1',
+        's6': 's6',
+
+        'm1': 'm5',
+        'm2': 'm4',
+        'm3': 'm3',
+        'm4': 'm2',
+        'm5': 'm1',
+        'm6': 'm6',
+        'm7': 'm7'
+    };
+
+    return map[zoneKey] || zoneKey; // Returns the mirrored key, or the original if not found
+};
+
 export function renderOpponentDeck(gameState) {
     const cardSlotDeck = document.getElementById('op-deck');
     cardSlotDeck.innerHTML = '';
@@ -48,20 +69,21 @@ export function renderOpponentMonsterZones(gameState) {
 
         if (zoneKey === 'm6') {
             if (gameState.opponent.monsterZones['m6'].card) {
-                faceUpId = 'm6';
-                setId = 'm6-set';
+                faceUpId = 'm7';
+                setId = 'm7-set';
                 isReverse = true;
             } else return;
         } else if (zoneKey === 'm7') {
             if (gameState.opponent.monsterZones['m7'].card) {
-                faceUpId = 'm7'; 
-                setId = 'm7-set'; 
+                faceUpId = 'm6'; 
+                setId = 'm6-set'; 
                 isReverse = true;
             }
             else return;
         } else {
-            faceUpId = `op-${zoneKey}`;
-            setId = `op-${zoneKey}-set`;
+            const mirrorKey = mirrorZoneKey(zoneKey);
+            faceUpId = `op-${mirrorKey}`;
+            setId = `op-${mirrorKey}-set`;
         }
         
         const faceUpSlot = document.getElementById(faceUpId);
@@ -109,10 +131,12 @@ export function renderOpponentMonsterZones(gameState) {
 export function renderOpponentSpellTrapZones(gameState){
     Object.keys(gameState.opponent.spellTrapZones).forEach(zoneKey => {
         const card = gameState.opponent.spellTrapZones[zoneKey];
-        const cardSlot = document.getElementById(`op-${zoneKey}`);
+        
+        const mirrorKey = mirrorZoneKey(zoneKey);
+        const cardSlot = document.getElementById(`op-${mirrorKey}`);
 
         if (!cardSlot) {
-            console.warn(`Spell/Trap DOM element not found for zoneKey: op-${zoneKey}`);
+            console.warn(`DEBUG -> Original zoneKey: "${zoneKey}" became mirrored: "${mirrorKey}", looking for element ID: "op-${mirrorKey}"`);
             return;
         }
 

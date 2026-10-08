@@ -41,6 +41,7 @@ export default class GameState {
             },
             spellTrapZones: {s1: null, s2: null, s3: null, s4: null, s5: null, s6: null }
         };
+
     }
 
     loadDeck(cardArray) {
@@ -48,18 +49,15 @@ export default class GameState {
     }
 
     hasXyzMonsterPresent() {
-        const monsterZones = this.player.monsterZones;
+        const monsterZones = this.player?.monsterZones;
         if (!monsterZones) return false;
 
-        for (const key of Object.keys(monsterZones)) {
-            const zoneData = monsterZones[key];
-            if (!zoneData) continue;
+        return Object.values(monsterZones).some(zone => {
+            const card = zone?.card;
+            const frameType = card?.rawApiData?.frameType?.toLowerCase();
+            const type = card?.type?.toLowerCase();
 
-            if (zoneData.card && zoneData.card.type === 'xyz') {
-                return true;
-            }
-        }
-
-        return false;
+            return frameType === 'xyz' || type?.includes('xyz');
+        });
     }
 }

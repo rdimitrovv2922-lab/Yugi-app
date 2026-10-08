@@ -1,19 +1,19 @@
+/* Page and overall board layout */
 body {
     background-color: #0A1128;
     margin: 0;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
-
-    position: relative;
 }
 
 #game-container {
-    position: absolute;
+    position: relative;
     max-width: 1200px;
     width: 80%;
-    margin: 0 auto;
+    margin-left: 40px;
+    margin-right: auto;
     transform: scale(0.9);
     transform-origin: center center;
 }
@@ -28,16 +28,140 @@ body {
     user-select: none;
 }
 
+.card-preview {
+    flex: 0 0 300px;
+    align-self: center;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 300px;
+    height: 600px;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    color: #fff;
+    background: #101522;
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #101522;
+    scrollbar-gutter: stable both-edges;
+}
+
+/* Card preview */
+.card-preview-name-holder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+
+    flex-shrink: 0;
+
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+
+    border: 1px solid #FFFFFF;
+    background: #333333;
+    border-radius: 5px;
+
+    box-sizing: border-box;
+}
+
+.card-preview-name {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    color: #FFFFFF;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+
+    width: 100%;
+}
+
+.card-preview-image {
+    display: block;
+    align-self: center;
+    width: 190px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.card-preview-details {
+    display: grid;
+
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.card-preview-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+
+    text-align: center;
+}
+
+.card-preview-row .full-width {
+    grid-column: 1 / -1;
+}
+
+.card-preview-dsc {
+    display: block;
+    flex-shrink: 0;
+    padding: 12px 14px;
+    color: #e5e9f2;
+    background: linear-gradient(145deg, #171f2e, #101522);
+    border: 1px solid #FFFFFF;
+    border-radius: 7px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.card-preview::-webkit-scrollbar {
+    width: 8px;
+}
+
+.card-preview::-webkit-scrollbar-track {
+    background: #101522;
+    border-radius: 8px;
+}
+
+.card-preview::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 8px;
+}
+
+.card-preview::-webkit-scrollbar-thumb:hover {
+    background: #f0cf55;
+}
+
+/* Player information and controls */
 .game-container-left, 
 .game-container-right {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    flex: 0 0 100px; /* Give both side columns an exact, equal fixed width */
+    flex: 0 0 100px;
 }
 
 .game-container-center {
+    position: relative;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -65,6 +189,7 @@ body {
     font-style: italic;
 }
 
+/* Turn and target buttons */
 .end-turn-button {
     display: flex;
     justify-content: center;
@@ -87,6 +212,45 @@ body {
     background-color: #666666;
 }
 
+#remove-target {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 15px;
+}
+
+#end-turn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+    /*margin-bottom: 15px;*/
+}
+
+.remove-target-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0 8px;
+    background-color: #333333;
+    border-radius: 5px;
+    border: 1px solid #FFFFFF;
+    text-align: center;
+    
+    color:#FFFFFF;
+    cursor: default;
+}
+
+.remove-target-button:hover {
+    background-color: #666666;
+}
+
+/* Turn and phase indicators */
 #turn-indicator {
     font-size: 20px;
     display: flex;
@@ -105,7 +269,7 @@ body {
     align-items: center;
     padding: 10px 20px;
     color: #FFFFFF;
-    margin-top: auto;
+    margin-top: 10px;
 }
 
 .phase {
@@ -135,6 +299,7 @@ body {
     color: #333333;
 }
 
+/* Hands and field zones */
 .hand-container {
     display: flex;
     flex-direction: row;
@@ -185,6 +350,7 @@ body {
     margin-bottom: -40.5px;
 }
 
+/* Card slots and card images */
 .monster-slot-wrapper {
     display: grid;
     place-items: center;
@@ -319,6 +485,7 @@ body {
     object-fit: contain;
 }
 
+/* Drop-down action menus */
 .dropbox {
     position: fixed;
     display: flex;
@@ -365,10 +532,11 @@ body {
     z-index: 1000;
 }
 
+/* Pile and material window */
 .window {
     position: absolute;
+
     display: grid;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
 
@@ -376,7 +544,7 @@ body {
     transform-origin: center center;
 
     gap: 10px;
-    width: 45%;
+    width: 100%;
     box-sizing: border-box;
 
     border: 2px solid #d4af37; 
@@ -391,6 +559,7 @@ body {
     font-weight: bold;
     color: white;
     text-align: center;
+    z-index: 9999;
 }
 
 .window-container {
@@ -414,7 +583,31 @@ body {
     flex-shrink: 0;
 }
 
+/* Card orientation and target markers */
 .reverse {
     transform: rotate(180deg);
     transform-origin: center center;
 }
+
+.set-slot.reverse {
+  transform: rotate(-90deg) rotate(180deg); 
+}
+
+.target {
+    outline: 5px double #00ffff; 
+    outline-offset: 4px;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+.target-opp {
+    outline: 5px double #ff073a; 
+    outline-offset: 4px;
+    box-shadow: 0 0 8px rgba(255, 7, 58, 0.6);
+}
+
+.target-both {
+    outline: 5px double #bf00ff; 
+    outline-offset: 4px;
+    box-shadow: 0 0 8px rgba(191, 0, 255, 0.6); 
+}
+

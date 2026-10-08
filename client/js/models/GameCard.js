@@ -3,7 +3,7 @@ export default class GameCard {
         this.instanceId = 'card_' + Math.random().toString(36).substring(2,9);
         this.id = apiCardData.id;
         this.name = apiCardData.name;
-        this.imageUrl = apiCardData.card_images[0].image_url;
+        this.imageUrl = `/assets/cards/${apiCardData.id}.jpg`;
         
         this.location = 'deck';
         this.zoneKey = null;  
@@ -13,10 +13,12 @@ export default class GameCard {
 
         this.type = apiCardData.type;
 
-        this.isVisibleToOpponent = false;
+        this.isVisibleToOpponent = true;
 
         this.isMaterial = false;
         this.isOwnerPlayer = true;
+
+        this.targetedBy = [];
     }
 
     moveToLocation(newLocation, newZoneKey = null){
@@ -45,6 +47,6 @@ export default class GameCard {
         this.isPositionAttack = true;
         this.isFaceUp = true;
         this.isMaterial = false;
-        this.isVisibleToOpponent = false;
+        this.isVisibleToOpponent = true;
     }
 }

@@ -10,79 +10,59 @@ const clientRoot = path.join(__dirname, '..', 'client');
 const contentTypes = {
     '.html': 'text/html',
     '.css': 'text/css',
-    '.js': 'text/javascript'
+    '.js': 'text/javascript',
+    '.jpg': 'image/jpeg'
 };
 
 const rooms = new Map();
 const sessions = new Map();
 
-const deckCardsOpp = [
-    {
-        id: 74677422,
-        name: 'Red-Eyes Black Dragon',
-        type: 'normal',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/74677422.jpg' }]
-    },
-    {
-        id: 70781052,
-        name: 'Summoned Skull',
-        type: 'normal',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/70781052.jpg' }]
-    }
-];
+const cardCatalogData = JSON.parse(
+    fs.readFileSync(path.join(__dirname, 'data', 'cards.json'), 'utf8')
+);
 
-const deckCards = [
-    {
-        id: 46986414,
-        name: 'Dark Magician',
-        type: 'normal',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/46986414.jpg' }]
-    },
-    {
-        id: 89631139,
-        name: 'Blue-Eyes White Dragon',
-        type: 'normal',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/89631139.jpg' }]
-    },
-];
+const cardCatalog = new Map(
+    cardCatalogData.data.map(card => [card.id, card])
+);
 
-const extraDeckCards = [
-    {
-        id: 23995346,
-        name: 'Blue-Eyes Ultimate Dragon',
-        type: 'fusion',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/23995346.jpg' }]
-    },
-    {
-        id: 84013237,
-        name: 'Number 39: Utopia',
-        type: 'xyz',
-        card_images: [{ image_url: 'https://images.ygoprodeck.com/images/cards/84013237.jpg' }]
-    }
-];
+const deckCardsOpp = [74677422, 70781052];
+const deckCards = [46986414, 89631139];
+
+const extraDeckCards = [23995346, 84013237];
+const extraDeckCardsOpp = [44508094, 16195942];
 
 function createRoomGameState() {
     const gameState = new GameState();
 
     for (let i = 0; i < 40; i++) {
-        const card = new GameCard(deckCards[i % deckCards.length]);
+        const card = new GameCard(cardCatalog.get(deckCards[i % deckCards.length]))
         card.moveToLocation('deck');
+        card.changeVisibility(false);
         gameState.player.deck.push(card);
     }
 
     for (let i = 0; i < 40; i++) {
-        const card = new GameCard(deckCardsOpp[i % deckCardsOpp.length]);
+        const card = new GameCard(cardCatalog.get(deckCardsOpp[i % deckCardsOpp.length]));
         card.moveToLocation('deck');
+        card.changeVisibility(false);
         gameState.opponent.deck.push(card);
     } 
 
-    for (const playerState of [gameState.player, gameState.opponent]) {
-        for (let i = 0; i < 15; i++) {
-            const card = new GameCard(extraDeckCards[i % extraDeckCards.length]);
-            card.moveToLocation('extradeck');
-            playerState.extradeck.push(card);
-        }
+    for (let i = 0; i < 15; i++) {
+        const card = new GameCard(cardCatalog.get(extraDeckCards[i % extraDeckCards.length]));
+        card.moveToLocation('extradeck');
+        card.changeVisibility(false);
+        gameState.player.extradeck.push(card);
+    }
 
+    for (let i = 0; i < 15; i++) {
+        const card = new GameCard(cardCatalog.get(extraDeckCardsOpp[i % extraDeckCardsOpp.length]));
+        card.moveToLocation('extradeck');
+        card.changeVisibility(false);
+        gameState.opponent.extradeck.push(card);
+    }
+
+    for (const playerState of [gameState.player, gameState.opponent]) {
         for (let i = 0; i < 5; i++) {
             GameRules.drawCard(playerState);
         }
@@ -242,16 +222,40 @@ const server = http.createServer(async (request, response) => {
             : room.gameState.opponent;
 
         try {
+            const isTargetCardAction = payload.ruleName === 'targetCard';
+
             const args = payload.args.map(argument => {
                 if (argument && typeof argument === 'object' && argument.instanceId) {
-                    const card = findCard(playerState, argument.instanceId);
-                    if (!card) throw new Error('Card does not belong to this player');
+                    let card = findCard(playerState, argument.instanceId);
+
+                    if (!card && isTargetCardAction) {
+                        const opponentState = session.role === 'player1'
+                            ? room.gameState.opponent
+                            : room.gameState.player;
+
+                        card = findCard(opponentState, argument.instanceId);
+                    }
+
+                    if (!card) {
+                        throw new Error(
+                            isTargetCardAction
+                                ? 'Target card was not found'
+                                : 'Card does not belong to this player'
+                        );
+                    }
+
                     return card;
                 }
                 return argument;
             });
 
-            rule(playerState, ...args);
+            if (payload.ruleName === 'clearTargets') {
+                rule(room.gameState, session.role);
+            } else if (isTargetCardAction) {
+                rule(playerState, ...args, session.role);
+            } else {
+                rule(playerState, ...args);
+            }
         } catch (error) {
             response.writeHead(400, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify({ error: error.message }));

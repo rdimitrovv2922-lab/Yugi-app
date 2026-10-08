@@ -23,6 +23,13 @@ export default class DropboxController {
 
     showDropbox(x, y, dropboxId='dropbox') {
         const dropbox = document.getElementById(`${dropboxId}`);
+
+        const visibleChildren = dropbox.querySelectorAll(':not(.hidden)');
+        if (visibleChildren.length === 0) {
+            dropbox.classList.add('hidden');
+            return;
+        }
+
         dropbox.classList.remove('hidden');
         
         let finalX = Math.min(x, window.innerWidth - dropbox.offsetWidth - 10);
@@ -36,100 +43,123 @@ export default class DropboxController {
         return target.closest('.dropbox') !== null || target.closest('[id^="dropbox-"]') !== null;
     }
 
-    setupDropboxes(activeCardInstance) {
+    setupDropboxes(activeCardInstance, isOwnerPlayer) {
         const sourceLocation = activeCardInstance.location;
 
-        const allOptions = this.dropbox.querySelectorAll('.dropbox-item');
-        allOptions.forEach(el => el.classList.add('hidden'));
+        const show = (selector, context = this.dropbox) => context.querySelector(selector)?.classList.remove('hidden');
+        const hide = (selector, context = this.dropbox) => context.querySelector(selector)?.classList.add('hidden');
 
-        const allSendToOptions = this.dropboxSendTo.querySelectorAll('[data-action]');
-        allSendToOptions.forEach(el => el.classList.remove('hidden'));
+        this.dropbox.querySelectorAll('.dropbox-item').forEach(el => el.classList.add('hidden'));
+        this.dropboxSendTo.querySelectorAll('[data-action]').forEach(el => el.classList.remove('hidden'));
+        this.dropboxSwitchPosition.querySelectorAll('[data-action]').forEach(el => el.classList.remove('hidden'));
+        this.dropboxMonster.querySelectorAll('[data-action]').forEach(el => el.classList.remove('hidden'));
 
-        const allSwitchPositionOptions = this.dropboxSwitchPosition.querySelectorAll('[data-action]');
-        allSwitchPositionOptions.forEach(el => el.classList.remove('hidden'));
+        if(!isOwnerPlayer) {
+            if (sourceLocation === 'spellTrapZone' || sourceLocation === 'graveyard' || sourceLocation === 'banish') show('#target');
 
-        const allMonsterOptions = this.dropboxMonster.querySelectorAll('[data-action]');
-        allMonsterOptions.forEach(el => el.classList.remove('hidden'));
-
-        const xyzSummonOption = this.dropboxMonster.querySelector(`[data-action="xyz-summon"]`);
-        if (xyzSummonOption) xyzSummonOption.classList.add('hidden');
-
-        const attachOption = this.dropbox.querySelector('#attach');
-        if (attachOption && this.state.hasXyzMonsterPresent()) {
-            attachOption.classList.remove('hidden');
+            if(sourceLocation === 'monsterZone') {
+                show('#target');
+                const zoneData = this.state.opponent.monsterZones[activeCardInstance.zoneKey];
+                if (zoneData.card.instanceId === activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                    show('#view');
+                } else if (zoneData.card.instanceId !== activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                    hide('#target');
+                }
+            }
+            return;
         }
 
-        switch(sourceLocation) {
+        const isXyz =
+            activeCardInstance.rawApiData?.frameType?.toLowerCase() === 'xyz' ||
+            activeCardInstance.type?.toLowerCase().includes('xyz');
+
+        hide('[data-action="xyz-summon"]', this.dropboxMonster);
+        if (this.state.hasXyzMonsterPresent()) show('#attach');
+
+        switch (sourceLocation) {
             case 'extradeck':
-                if (activeCardInstance.type === 'xyz') {
-                    if (xyzSummonOption) xyzSummonOption.classList.remove('hidden'); 
-                }
-                this.dropboxMonster.querySelector(`[data-action="normal-summon"]`).classList.add('hidden');
-                this.dropboxMonster.querySelector(`[data-action="set"]`).classList.add('hidden');
+                if (isXyz) show('[data-action="xyz-summon"]', this.dropboxMonster);
+                hide('[data-action="normal-summon"]', this.dropboxMonster);
+                hide('[data-action="set"]', this.dropboxMonster);
             case 'deck':
             case 'hand':
             case 'graveyard':
-                this.dropbox.querySelector('#monster').classList.remove('hidden');
-                this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
-                this.dropbox.querySelector('#send').classList.remove('hidden');
-                
-                if (sourceLocation !== 'deck') {
-                    this.dropbox.querySelector('#activate').classList.remove('hidden');
-                }
-
-                this.dropboxSendTo.querySelector(`[data-action="${sourceLocation}"]`).classList.add('hidden');
-                break;       
-            case 'banish':
-                this.dropbox.querySelector('#monster').classList.remove('hidden');
-                this.dropbox.querySelector('#spell-trap').classList.remove('hidden');
-                this.dropbox.querySelector('#send').classList.remove('hidden');
-                this.dropbox.querySelector('#activate').classList.remove('hidden');
-
-                this.dropboxSendTo.querySelector(`[data-action="banish-up"]`).classList.add('hidden');
-                this.dropboxSendTo.querySelector(`[data-action="banish-down"]`).classList.add('hidden');
+                show('#monster');
+                show('#spell-trap');
+                show('#send');
+                if (sourceLocation !== 'deck') show('#activate');
+                if (sourceLocation === 'graveyard') show('#target');
+                hide(`[data-action="${sourceLocation}"]`, this.dropboxSendTo);
                 break;
-            case 'monsterZone':
-                this.dropbox.querySelector('#activate').classList.remove('hidden');
-                this.dropbox.querySelector('#send').classList.remove('hidden');
-                this.dropbox.querySelector('#move').classList.remove('hidden');
 
-                const zoneData = this.state.player.monsterZones[activeCardInstance.zoneKey]
-                if (zoneData && zoneData.card && zoneData.card.instanceId === activeCardInstance.instanceId && zoneData.materials.length > 0) {
-                    this.dropbox.querySelector('#view').classList.remove('hidden');
-                } else if (zoneData.card && zoneData.card.instanceId != activeCardInstance.instanceId && zoneData.materials.length > 0) {
-                    this.dropbox.querySelector('#activate').classList.add('hidden');
-                    break;
+            case 'banish':
+                show('#monster');
+                show('#spell-trap');
+                show('#send');
+                show('#activate');
+                show('#target');
+                hide('[data-action="banish-up"]', this.dropboxSendTo);
+                hide('[data-action="banish-down"]', this.dropboxSendTo);
+                break;
+
+            case 'monsterZone': {
+                show('#activate');
+                show('#send');
+                show('#move');
+                show('#switch');
+                show('#target');
+
+                const zoneData = this.state.player.monsterZones[activeCardInstance.zoneKey];
+                if (zoneData?.card) {
+                    if (zoneData.card.instanceId === activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                        show('#view');
+                    } else if (zoneData.card.instanceId !== activeCardInstance.instanceId && zoneData.materials.length > 0) {
+                        hide('#activate');
+                        break;
+                    }
                 }
 
-                this.dropbox.querySelector('#switch').classList.remove('hidden');
                 if (activeCardInstance.isPositionAttack) {
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-atk"]').classList.add('hidden');
+                    hide('[data-action="to-atk"]', this.dropboxSwitchPosition);
                 } else if (activeCardInstance.isFaceUp) {
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-def"]').classList.add('hidden');
+                    hide('[data-action="to-def"]', this.dropboxSwitchPosition);
                 } else {
-                    this.dropboxSwitchPosition.querySelector('[data-action="to-set"]').classList.add('hidden');
+                    hide('[data-action="to-set"]', this.dropboxSwitchPosition);
                 }
-                break;   
-            case 'spellTrapZone':
-                this.dropbox.querySelector('#activate').classList.remove('hidden');
-                this.dropbox.querySelector('#send').classList.remove('hidden');
-                this.dropbox.querySelector('#move').classList.remove('hidden');
+                break;
+            }
 
-                this.dropbox.querySelector('[data-action="flip"]').classList.remove('hidden');
-                break;   
+            case 'spellTrapZone':
+                show('#activate');
+                show('#send');
+                show('#move');
+                show('#target');
+                show('#flip');
+                break;
         }
     }
 
-    setupDropboxPile(sourceLocation) {
+    setupDropboxPile(sourceLocation, isOwnerPlayer) {
         const allOptions = this.dropboxPile.querySelectorAll('.dropbox-item');
         allOptions.forEach(el => el.classList.add('hidden'));
 
-        const pileActions = {
-            deck: ['draw', 'shuffle', 'mill', 'banish-up', 'banish-down', 'view'],
-            extradeck: ['view', 'shuffle', 'banish-r-up', 'banish-r-down', 'to-gy-r'],
-            graveyard: ['view', 'banish-r-up', 'banish-r-down'],
-            banish: ['view', 'to-gy-r', 'to-deck-r']
-        };
+        let pileActions = null;
+
+        if(isOwnerPlayer) {
+            pileActions = {
+                deck: ['draw', 'shuffle', 'mill', 'banish-up', 'banish-down', 'view'],
+                extradeck: ['view', 'shuffle', 'banish-r-up', 'banish-r-down', 'to-gy-r'],
+                graveyard: ['view', 'banish-r-up', 'banish-r-down'],
+                banish: ['view', 'to-gy-r', 'to-deck-r']
+            };
+        } else {
+            pileActions = {
+                deck: ['view'],
+                extradeck: ['view'],
+                graveyard: ['view'],
+                banish: ['view']
+            };
+        }
 
         const actionsToShow = pileActions[sourceLocation] || [];
         actionsToShow.forEach(action => {

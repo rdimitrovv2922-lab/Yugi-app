@@ -107,6 +107,7 @@ export function summonMonsterCard(playerState, cardInstance, zoneKey){
 
     cardInstance.moveToLocation('monsterZone', zoneKey);
     cardInstance.setIsPositionAttack(true);
+    cardInstance.changeVisibility(true);
     
     playerState.monsterZones[zoneKey].card = cardInstance;
     playerState.monsterZones[zoneKey].materials = transferredMaterials;
@@ -119,6 +120,7 @@ export function setMonsterCard(playerState, cardInstance, zoneKey, isFaceUp){
     cardInstance.moveToLocation('monsterZone', zoneKey);
     cardInstance.setIsPositionAttack(false);
     cardInstance.setIsFaceUp(isFaceUp);
+    cardInstance.changeVisibility(true);
 
     playerState.monsterZones[zoneKey].card = cardInstance;
     playerState.monsterZones[zoneKey].materials = transferredMaterials;
@@ -129,6 +131,8 @@ export function activateSpellTrapCard(playerState, cardInstance, zoneKey, isFace
 
     cardInstance.moveToLocation('spellTrapZone', zoneKey);
     cardInstance.setIsFaceUp(isFaceUp);
+    cardInstance.changeVisibility(true);
+
     playerState.spellTrapZones[zoneKey] = cardInstance;
 }
 
@@ -136,6 +140,8 @@ export function sendCardToGraveyard(playerState, cardInstance) {
     removeCardFromSource(playerState, cardInstance, cardInstance.location);
 
     cardInstance.moveToLocation('graveyard');
+    cardInstance.changeVisibility(true);
+
     playerState.graveyard.push(cardInstance);
 }
 
@@ -144,6 +150,8 @@ export function sendCardToBanish(playerState, cardInstance, isFaceUp = true) {
 
     cardInstance.setIsFaceUp(isFaceUp);
     cardInstance.moveToLocation('banish');
+    cardInstance.changeVisibility(true);
+
     playerState.banish.push(cardInstance);
 }
 
@@ -151,6 +159,8 @@ export function sendCardToDeck(playerState, cardInstance) {
     removeCardFromSource(playerState, cardInstance, cardInstance.location);
 
     cardInstance.moveToLocation('deck');
+    cardInstance.changeVisibility(false);
+
     playerState.deck.push(cardInstance);
 }
 
@@ -158,6 +168,8 @@ export function sendCardToExtraDeck(playerState, cardInstance) {
     removeCardFromSource(playerState, cardInstance, cardInstance.location);
 
     cardInstance.moveToLocation('extradeck');
+    cardInstance.changeVisibility(false);
+
     playerState.extradeck.push(cardInstance);
 }
 
@@ -165,6 +177,8 @@ export function sendCardToHand(playerState, cardInstance) {
     removeCardFromSource(playerState, cardInstance, cardInstance.location);
 
     cardInstance.moveToLocation('hand');
+    cardInstance.changeVisibility(false);
+
     playerState.hand.push(cardInstance);
 }
 
@@ -201,6 +215,7 @@ export function moveRandomCardFromTo(playerState, sourcePileFrom, sourcePileTo, 
 
     randomCard.moveToLocation(sourcePileTo);
     randomCard.setIsFaceUp(isFaceUp);
+    if(sourcePileTo === 'deck') randomCard.changeVisibility(false);
 
     const targetArray = playerState[sourcePileTo];
     if (targetArray && Array.isArray(targetArray)) {
@@ -231,6 +246,8 @@ export function attachCard(playerState, cardInstance, zoneKey) {
 
     removeCardFromSource(playerState, cardInstance);
     cardInstance.moveToLocation('monsterZone', zoneKey);
+    cardInstance.changeVisibility(true);
+
     zoneData.materials.push(cardInstance);
 }
 
@@ -241,6 +258,7 @@ export function xyzSummon(playerState, cardInstance, zoneKey) {
     removeCardFromSource(playerState, cardInstance);
     
     cardInstance.moveToLocation('monsterZone', zoneKey);
+    cardInstance.changeVisibility(true);
 
     const oldTopCard = zoneData.card; 
     oldTopCard.returnToDefault();
@@ -248,4 +266,35 @@ export function xyzSummon(playerState, cardInstance, zoneKey) {
 
     zoneData.card = cardInstance;
     zoneData.materials.push(oldTopCard);
+}
+
+export function targetCard(playerState, cardInstance, targetingRole) {
+    if (!cardInstance || !['player1', 'player2'].includes(targetingRole)) return;
+
+    if (!cardInstance.targetedBy.includes(targetingRole)) {
+        cardInstance.targetedBy.push(targetingRole);
+    }
+}
+
+export function clearTargets(gameState, targetingRole) {
+    if (!['player1', 'player2'].includes(targetingRole)) return;
+
+    function clearCard(card) {
+        if (Array.isArray(card?.targetedBy)) {
+            card.targetedBy = card.targetedBy.filter(role => role !== targetingRole);
+        }
+    }
+
+    for (const playerState of [gameState.player, gameState.opponent]) {
+        for (const pileName of ['deck', 'extradeck', 'graveyard', 'banish', 'hand']) {
+            (playerState[pileName] || []).forEach(clearCard);
+        }
+
+        for (const zone of Object.values(playerState.monsterZones || {})) {
+            clearCard(zone?.card);
+            (zone?.materials || []).forEach(clearCard);
+        }
+
+        Object.values(playerState.spellTrapZones || {}).forEach(clearCard);
+    }
 }

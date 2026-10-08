@@ -5,7 +5,16 @@
     <link rel="stylesheet" href="game-board.css">
 </head>
 <body>
-    <div id="game-container" class="game-container">   
+    <div id="game-container" class="game-container"> 
+        <div id="card-preview" class="card-preview" aria-hidden="false">
+            <div id="card-preview-name-holder" class="card-preview-name-holder">
+                <div id="card-preview-name" class="card-preview-name">Unknown Card</div>
+            </div>
+            <img id="card-preview-image" class="card-preview-image hidden">
+            <div id="card-preview-details" class="card-preview-details">
+            </div>
+            <div id="card-preview-dsc" class="card-preview-dsc">Hover over a card to see its details.</div>
+        </div>  
 
         <div class="game-container-left"> 
             <div id="turn-indicator">
@@ -32,7 +41,7 @@
             </div>
         </div>
 
-        <div class="game-container-center">
+        <div id="game-container-center" class="game-container-center">
             <div id="op-hand" class="hand-container">
             </div>
 
@@ -47,7 +56,7 @@
                     </div>
 
                     <div class="banished-zone">
-                        <div id="op-banish" class="card-slot banished reverse"></div>
+                        <div id="op-banish" class="card-slot banish reverse"></div>
                     </div>
                 </div>
                 
@@ -90,7 +99,7 @@
                 
                 <div class="right-zones">
                     <div class="extra-deck-zone">
-                        <div id="op-extradeck" class="card-slot deck extra-deck reverse"></div>
+                        <div id="op-extradeck" class="card-slot deck extradeck reverse"></div>
                     </div>
 
                     <div class="field-zone">
@@ -175,7 +184,7 @@
 
                 <div class="right-zones">
                     <div class="banished-zone">
-                        <div id="banish" class="card-slot banished"></div>
+                        <div id="banish" class="card-slot banish"></div>
                     </div>
                     
                     <div class="graveyard-zone">
@@ -191,6 +200,12 @@
             <div id="player-hand" class="hand-container">
             </div>
 
+            <div id="window" class="window hidden">
+                <div id="window-identifier">Graveyard</div>
+                <div id="window-container" class="window-container">
+                </div>
+            </div>
+
         </div>
 
         <div class="game-container-right">
@@ -198,14 +213,12 @@
                 <span class="player-name">Opponent</span>
                 <span class="player-lp">8000 LP</span>
             </div> 
+
+            <div id="remove-target">
+                <div class="remove-target-button">Remove Target(s)</div>
+            </div>
         </div>
 
-    </div>
-    
-    <div id="window" class="window hidden">
-        <div id="window-identifier">Graveyard</div>
-        <div id="window-container" class="window-container">
-        </div>
     </div>
     
     <div id="dropbox" class="dropbox hidden">
@@ -218,6 +231,7 @@
         <div id="flip" class="dropbox-item" data-action="flip">Flip</div>
         <div id="attach" class="dropbox-item hidden" data-action="attach">Attach</div>
         <div id="view" class="dropbox-item" data-action="view">View</div>
+        <div id="target" class="dropbox-item" data-action="target">Target</div>
     </div>
 
     <div id="dropbox-monster" class="dropbox hidden">
@@ -260,6 +274,8 @@
         <div class="dropbox-item" data-action="to-gy-r">Send to GY Random</div>
         <div class="dropbox-item" data-action="to-deck-r">Send to Deck Random</div>
     </div>
+
+   
 
 <script type="module" src="js/main.js"></script>    
 </body>

@@ -212,11 +212,15 @@ export function renderBanish(gameState) {
     cardSlotBanish.setAttribute('data-instance-id', card.instanceId);
 }
 
-export function renderWindow(gameState, cardInstance) {
+export function renderWindow(gameState, cardInstance, isOwnerPlayer) {
     const window = document.getElementById('window-container');
     const windowIdentifier = document.getElementById('window-identifier');
     window.innerHTML = '';
     windowIdentifier.innerHTML = '';
+
+    let playerState = null;
+    if (isOwnerPlayer) playerState = gameState.player;
+    else playerState = gameState.opponent;
 
     let target = null;
 
@@ -225,23 +229,23 @@ export function renderWindow(gameState, cardInstance) {
     switch (location) {
         case 'monsterZone':
             windowIdentifier.textContent = "Materials";
-            target = gameState.player.monsterZones[cardInstance.zoneKey].materials;
+            target = playerState.monsterZones[cardInstance.zoneKey].materials;
             break;
         case 'graveyard':
             windowIdentifier.textContent = "Graveyard";
-            target = gameState.player.graveyard;
+            target = playerState.graveyard;
             break;
         case 'banish':
             windowIdentifier.textContent = "Banish";
-            target = gameState.player.banish;
+            target = playerState.banish;
             break;
         case 'deck':
             windowIdentifier.textContent = "Deck";
-            target = gameState.player.deck; 
+            target = playerState.deck; 
             break;
         case 'extradeck':
             windowIdentifier.textContent = "Extra Deck";
-            target = gameState.player.extradeck;
+            target = playerState.extradeck;
             break;
     }
 
@@ -254,17 +258,103 @@ export function renderWindow(gameState, cardInstance) {
         cardSlot.setAttribute('data-instance-id', card.instanceId);
 
         const img = document.createElement('img');
-        if (card.isFaceUp) {
-            img.src = card.imageUrl;
-            img.alt = card.name;
-        } else {
+        if (!card.isFaceUp || (!isOwnerPlayer && !card.isVisibleToOpponent)) {
             img.src = CARD_BACK_URL;
             img.alt = "Set card";
+        } else {
+           
+            img.src = card.imageUrl;
+            img.alt = card.name;
         }
 
         cardSlot.appendChild(img);
         window.appendChild(cardSlot);
     });
+
+    applyTargetedCardClasses(gameState);
+}
+
+function applyTargetedCardClasses(gameState) {
+    const viewerRole = gameState.viewerRole;
+    if (!viewerRole) return;
+
+    const otherRole = viewerRole === 'player1' ? 'player2' : 'player1';
+    const targetClasses = ['target', 'target-opp', 'target-both'];
+
+    document.querySelectorAll('.target, .target-opp, .target-both').forEach(element => {
+        element.classList.remove(...targetClasses);
+    });
+
+    const cardsById = new Map();
+
+    function rememberCard(card) {
+        if (card?.instanceId) {
+            cardsById.set(card.instanceId, card);
+        }
+    }
+
+    function collectCards(playerState) {
+        for (const pileName of ['deck', 'extradeck', 'graveyard', 'banish', 'hand']) {
+            (playerState[pileName] || []).forEach(rememberCard);
+        }
+
+        for (const zone of Object.values(playerState.monsterZones || {})) {
+            rememberCard(zone?.card);
+            (zone?.materials || []).forEach(rememberCard);
+        }
+
+        Object.values(playerState.spellTrapZones || {}).forEach(rememberCard);
+    }
+
+    collectCards(gameState.player);
+    collectCards(gameState.opponent);
+
+    function applyTargetClasses(element, targetedBy) {
+        if (!element) return;
+
+        const byViewer = targetedBy.includes(viewerRole);
+        const byOpponent = targetedBy.includes(otherRole);
+
+        if (byViewer && byOpponent) {
+            element.classList.add('target-both');
+        } else if (byViewer) {
+            element.classList.add('target');
+        } else if (byOpponent) {
+            element.classList.add('target-opp');
+        }
+    }
+
+    const pileSlots = [
+        ['graveyard', gameState.player.graveyard],
+        ['banish', gameState.player.banish],
+        ['op-graveyard', gameState.opponent.graveyard],
+        ['op-banish', gameState.opponent.banish]
+    ];
+
+    const pileSlotIds = new Set(pileSlots.map(([id]) => id));
+
+    document.querySelectorAll('[data-instance-id]').forEach(element => {
+        // Highlight individual cards in the window, but handle pile slots below.
+        if (pileSlotIds.has(element.id)) return;
+
+        const card = cardsById.get(element.getAttribute('data-instance-id'));
+        applyTargetClasses(element, card?.targetedBy || []);
+    });
+
+    for (const [slotId, cards] of pileSlots) {
+        const pileTargeters = new Set();
+
+        for (const card of cards || []) {
+            for (const role of card.targetedBy || []) {
+                pileTargeters.add(role);
+            }
+        }
+
+        applyTargetClasses(
+            document.getElementById(slotId),
+            [...pileTargeters]
+        );
+    }
 }
 
 export function renderBoard(gameState){
@@ -277,4 +367,6 @@ export function renderBoard(gameState){
     renderBanish(gameState);
 
     renderOpponentBoard(gameState);
+
+    applyTargetedCardClasses(gameState);
 }

@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     sessionStorage.setItem('yugiSessionId', joinInfo.sessionId);
     sessionStorage.setItem('yugiRole', joinInfo.role);
+    state.viewerRole = joinInfo.role;
     console.log(`Joined room ${roomId} as ${joinInfo.role}`);
 
     document.querySelector('.end-turn-button').addEventListener('click', async () => {
@@ -52,6 +53,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         console.log('Server accepted end turn. Shared state:', result);
+    });
+
+    document.querySelector('.remove-target-button').addEventListener('click', async () => {
+        const sessionId = sessionStorage.getItem('yugiSessionId');
+
+        const response = await fetch('/api/action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                ruleName: 'clearTargets',
+                args: []
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            console.error('Could not clear your targets:', result.error);
+        }
     });
 
     const turnLabel = document.getElementById('turn-number');
