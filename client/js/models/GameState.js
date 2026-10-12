@@ -3,6 +3,7 @@ import GameCard from "./GameCard.js";
 export default class GameState {
     constructor() {
         this.turn = 'player1';
+        this.phase = 'DP';
         
         this.player = {
             lp: 8000,
@@ -44,8 +45,8 @@ export default class GameState {
 
     }
 
-    loadDeck(cardArray) {
-        this.player.deck = cardArray.map(apiCard => new GameCard(apiCard));
+    loadDeck(cardArray, ownerRole = 'player1') {
+        this.player.deck = cardArray.map(apiCard => new GameCard(apiCard, ownerRole));
     }
 
     hasXyzMonsterPresent() {

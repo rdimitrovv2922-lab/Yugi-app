@@ -1,4 +1,5 @@
-import { CARD_BACK_URL, renderOpponentBoard } from './opRenderer.js';
+import { CARD_BACK_URL } from '../cardAssets.js';
+import { renderOpponentBoard } from './opRenderer.js';
 
 export function renderDeck(gameState) {
     const cardSlotDeck = document.getElementById('deck');
@@ -56,7 +57,9 @@ export function renderMonsterZones(gameState) {
         
         const faceUpSlot = document.getElementById(faceUpId);
         const setSlot = document.getElementById(setId);
-
+        const monsterWrapper = faceUpSlot.closest('.monster-slot-wrapper');
+        
+        monsterWrapper?.querySelector('.atk-def-indicator')?.remove();
         faceUpSlot.innerHTML = '';
         setSlot.innerHTML = '';
         faceUpSlot.removeAttribute('data-instance-id');
@@ -72,10 +75,18 @@ export function renderMonsterZones(gameState) {
 
         const card = zoneData.card;
 
+        const indicator = document.createElement('div');
+        indicator.className = 'atk-def-indicator';
+        indicator.textContent =
+            `${card.rawApiData?.atk ?? '?'} / ${card.rawApiData?.def ?? '?'}`;
+
+        monsterWrapper?.appendChild(indicator);
+
         if(card.isPositionAttack) {
             const img = document.createElement('img');
             img.src = card.imageUrl;
             img.alt = card.name;
+            if (card.isToken) img.classList.add('token-img');
             faceUpSlot.appendChild(img);
             faceUpSlot.setAttribute('data-instance-id', card.instanceId);
         } else {
@@ -89,6 +100,8 @@ export function renderMonsterZones(gameState) {
                 img.src = card.imageUrl;
                 img.alt = card.name;
             }
+
+            if (card.isToken) img.classList.add('token-img');
 
             setSlot.appendChild(img);
             setSlot.setAttribute('data-instance-id', card.instanceId);
@@ -225,11 +238,18 @@ export function renderWindow(gameState, cardInstance, isOwnerPlayer) {
     let target = null;
 
     const location = cardInstance.location;
+    let isMaterialsWindow = false;
 
     switch (location) {
         case 'monsterZone':
             windowIdentifier.textContent = "Materials";
             target = playerState.monsterZones[cardInstance.zoneKey].materials;
+            isMaterialsWindow = true;
+            break;
+        case 'spellTrapZone':
+            windowIdentifier.textContent = "Materials";
+            target = cardInstance.attachedMaterials || [];
+            isMaterialsWindow = true;
             break;
         case 'graveyard':
             windowIdentifier.textContent = "Graveyard";
@@ -258,7 +278,7 @@ export function renderWindow(gameState, cardInstance, isOwnerPlayer) {
         cardSlot.setAttribute('data-instance-id', card.instanceId);
 
         const img = document.createElement('img');
-        if (!card.isFaceUp || (!isOwnerPlayer && !card.isVisibleToOpponent)) {
+        if (!isMaterialsWindow && (!card.isFaceUp || (!isOwnerPlayer && !card.isVisibleToOpponent))) {
             img.src = CARD_BACK_URL;
             img.alt = "Set card";
         } else {
@@ -301,9 +321,13 @@ function applyTargetedCardClasses(gameState) {
         for (const zone of Object.values(playerState.monsterZones || {})) {
             rememberCard(zone?.card);
             (zone?.materials || []).forEach(rememberCard);
+            (zone?.card?.attachedMaterials || []).forEach(rememberCard);
         }
 
-        Object.values(playerState.spellTrapZones || {}).forEach(rememberCard);
+        Object.values(playerState.spellTrapZones || {}).forEach(card => {
+            rememberCard(card);
+            (card?.attachedMaterials || []).forEach(rememberCard);
+        });
     }
 
     collectCards(gameState.player);

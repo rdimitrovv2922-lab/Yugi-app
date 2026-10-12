@@ -1,4 +1,5 @@
-export const CARD_BACK_URL = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/3c938f85-f834-4bb3-b3b2-97d295769464/dal6wsb-fc4aaba4-d6ff-4029-a83f-9b518abd511d.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwic3ViIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsImF1ZCI6WyJ1cm46c2VydmljZTpmaWxlLmRvd25sb2FkIl0sIm9iaiI6W1t7InBhdGgiOiIvZi8zYzkzOGY4NS1mODM0LTRiYjMtYjNiMi05N2QyOTU3Njk0NjQvZGFsNndzYi1mYzRhYWJhNC1kNmZmLTQwMjktYTgzZi05YjUxOGFiZDUxMWQucG5nIn1dXX0._Al6plUB_BwuHO4MI18fPE6GgtgvtaTTUGRHdqVo0sg";
+import { CARD_BACK_URL } from '../cardAssets.js';
+export { CARD_BACK_URL };
 
 import { updateHandContainerVisuals } from './renderer.js';
 
@@ -68,18 +69,13 @@ export function renderOpponentMonsterZones(gameState) {
         let isReverse = false;
 
         if (zoneKey === 'm6') {
-            if (gameState.opponent.monsterZones['m6'].card) {
-                faceUpId = 'm7';
-                setId = 'm7-set';
-                isReverse = true;
-            } else return;
+            faceUpId = 'm7';
+            setId = 'm7-set';
+            isReverse = true;
         } else if (zoneKey === 'm7') {
-            if (gameState.opponent.monsterZones['m7'].card) {
-                faceUpId = 'm6'; 
-                setId = 'm6-set'; 
-                isReverse = true;
-            }
-            else return;
+            faceUpId = 'm6';
+            setId = 'm6-set';
+            isReverse = true;
         } else {
             const mirrorKey = mirrorZoneKey(zoneKey);
             faceUpId = `op-${mirrorKey}`;
@@ -88,6 +84,19 @@ export function renderOpponentMonsterZones(gameState) {
         
         const faceUpSlot = document.getElementById(faceUpId);
         const setSlot = document.getElementById(setId);
+        const monsterWrapper = faceUpSlot.closest('.monster-slot-wrapper');
+
+        if ((zoneKey === 'm6' || zoneKey === 'm7') && !zoneData?.card) {
+            const sharedOwnZoneKey = zoneKey === 'm6' ? 'm7' : 'm6';
+            if (gameState.player.monsterZones[sharedOwnZoneKey]?.card) {
+                monsterWrapper?.querySelector('.atk-def-indicator-opp')?.remove();
+                return;
+            }
+        }
+
+        monsterWrapper?.querySelector('.atk-def-indicator-opp')?.remove();
+        if(monsterWrapper) console.log('Atk/Def indicator removed from monsterWrapper:', monsterWrapper.id);
+        else console.warn('Monster wrapper not found for faceUpSlot:', faceUpId);
 
         faceUpSlot.innerHTML = '';
         setSlot.innerHTML = '';
@@ -99,10 +108,20 @@ export function renderOpponentMonsterZones(gameState) {
 
         const card = zoneData.card;
 
+        if(card.isFaceUp) {
+            const indicator = document.createElement('div');
+            indicator.className = 'atk-def-indicator-opp';
+            indicator.textContent =
+                `${card.rawApiData?.atk ?? '?'} / ${card.rawApiData?.def ?? '?'}`;
+
+            monsterWrapper?.appendChild(indicator);
+        }
+
         if(card.isPositionAttack) {
             const img = document.createElement('img');
             img.src = card.imageUrl;
             img.alt = card.name;
+            if (card.isToken) img.classList.add('token-img');
             faceUpSlot.appendChild(img);
             faceUpSlot.setAttribute('data-instance-id', card.instanceId);
 
@@ -118,6 +137,8 @@ export function renderOpponentMonsterZones(gameState) {
                 img.src = card.imageUrl;
                 img.alt = card.name;
             }
+
+            if (card.isToken) img.classList.add('token-img');
 
             setSlot.appendChild(img);
             setSlot.setAttribute('data-instance-id', card.instanceId);
@@ -171,7 +192,7 @@ export function renderOpponentHand(gameState) {
 
         const img = document.createElement('img');
 
-        if (card.isRevealedToOpponent) {
+        if (card.isVisibleToOpponent) {
             img.src = card.imageUrl;
             img.alt = card.name;
         } else {

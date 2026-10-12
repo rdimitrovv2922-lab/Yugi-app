@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 421 614" role="img" aria-labelledby="title description">
+  <title id="title">Token</title>
+  <desc id="description">A temporary monster token for the game board.</desc>
+  <defs>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4d77c"/>
+      <stop offset=".5" stop-color="#aa7e2c"/>
+      <stop offset="1" stop-color="#e8c65f"/>
+    </linearGradient>
+    <radialGradient id="field" cx="50%" cy="42%" r="68%">
+      <stop offset="0" stop-color="#526c8b"/>
+      <stop offset=".55" stop-color="#233951"/>
+      <stop offset="1" stop-color="#101a2a"/>
+    </radialGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ddf6ff"/>
+      <stop offset=".45" stop-color="#75d9ec"/>
+      <stop offset="1" stop-color="#4a77c4"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="7" y="7" width="407" height="600" rx="22" fill="#151b24" stroke="url(#frame)" stroke-width="14"/>
+  <rect x="25" y="25" width="371" height="564" rx="13" fill="#27251e" stroke="#5b4b2b" stroke-width="3"/>
+  <rect x="37" y="37" width="347" height="54" rx="6" fill="#dbc98d"/>
+  <text x="54" y="73" fill="#171717" font-family="Georgia,serif" font-size="28" font-weight="700">TOKEN</text>
+  <circle cx="348" cy="64" r="19" fill="#a53225" stroke="#f6daa0" stroke-width="3"/>
+  <text x="348" y="72" text-anchor="middle" fill="#fff4d6" font-family="Arial,sans-serif" font-size="22" font-weight="700">✦</text>
+  <rect x="39" y="104" width="343" height="371" rx="5" fill="url(#field)" stroke="url(#frame)" stroke-width="5"/>
+  <circle cx="210" cy="289" r="122" fill="none" stroke="#98daef" stroke-opacity=".5" stroke-width="3"/>
+  <circle cx="210" cy="289" r="91" fill="none" stroke="#b3d5e8" stroke-opacity=".42" stroke-width="2" stroke-dasharray="5 8"/>
+  <path d="M210 150 229 258 338 289 229 320 210 428 191 320 82 289 191 258Z" fill="#a9d9e9" fill-opacity=".2" stroke="#b7e7f3" stroke-opacity=".65" stroke-width="2"/>
+  <circle cx="210" cy="289" r="49" fill="#76d7eb" fill-opacity=".4" filter="url(#glow)"/>
+  <circle cx="210" cy="289" r="34" fill="url(#orb)" stroke="#e3fbff" stroke-width="4"/>
+  <path d="M210 267 218 281 235 284 222 295 225 312 210 304 195 312 198 295 185 284 202 281Z" fill="#f5fbff"/>
+  <path d="m72 137 12-18 12 18-12 18Zm257 237 10-15 10 15-10 15ZM105 400l7-11 7 11-7 11Z" fill="#d7f6ff" fill-opacity=".75"/>
+  <rect x="39" y="488" width="343" height="80" rx="4" fill="#e8dfc2" stroke="#8b7445" stroke-width="3"/>
+  <text x="55" y="518" fill="#1f1d19" font-family="Georgia,serif" font-size="17" font-weight="700">A temporary monster token.</text>
+  <text x="55" y="542" fill="#36322a" font-family="Georgia,serif" font-size="14">It disappears when it leaves the field.</text>
+  <rect x="241" y="572" width="141" height="19" rx="3" fill="#201d18"/>
+  <text x="370" y="586" text-anchor="end" fill="#f0e7d1" font-family="Arial,sans-serif" font-size="12" font-weight="700">ATK 0 / DEF 0</text>
+</svg>

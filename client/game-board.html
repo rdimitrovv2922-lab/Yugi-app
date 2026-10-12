@@ -35,9 +35,9 @@
                 <div class="phase" data-phase="EP">EP</div>
             </div>
 
-            <div class="player-info-box">
+            <div id="player-info-box" class="player-info-box">
                 <span class="player-name">Player</span>
-                <span class="player-lp">8000 LP</span>     
+                <span id="player-lp" class="player-lp">8000 LP</span>     
             </div>
         </div>
 
@@ -209,13 +209,17 @@
         </div>
 
         <div class="game-container-right">
-            <div class="player-info-box">
+            <div id="opponent-info-box" class="player-info-box">
                 <span class="player-name">Opponent</span>
-                <span class="player-lp">8000 LP</span>
+                <span id="opponent-lp" class="player-lp">8000 LP</span>
             </div> 
 
+            <div id="token-control">
+                <button id="place-token-button" class="action-button token-button" type="button" aria-pressed="false"><span>Place<br>Token</span></button>
+            </div>
+
             <div id="remove-target">
-                <div class="remove-target-button">Remove Target(s)</div>
+                <button class="action-button remove-target-button" type="button"><span>Remove<br>Target(s)</span></button>
             </div>
         </div>
 
@@ -232,6 +236,9 @@
         <div id="attach" class="dropbox-item hidden" data-action="attach">Attach</div>
         <div id="view" class="dropbox-item" data-action="view">View</div>
         <div id="target" class="dropbox-item" data-action="target">Target</div>
+        <div id="steal" class="dropbox-item hidden" data-action="steal">Steal</div>
+        <div id="reveal" class="dropbox-item" data-action="reveal">Reveal</div>
+        <div id="hide" class="dropbox-item" data-action="hide">Hide</div>
     </div>
 
     <div id="dropbox-monster" class="dropbox hidden">
@@ -262,6 +269,14 @@
         <div class="dropbox-item" data-action="to-set">Switch to Set</div>
     </div>
 
+    <div id="dropbox-steal-placement" class="dropbox hidden">
+        <div class="dropbox-item" data-action="monster-attack">Monster - Attack</div>
+        <div class="dropbox-item" data-action="monster-defense">Monster - Face-Up Defense</div>
+        <div class="dropbox-item" data-action="monster-set">Monster - Set</div>
+        <div class="dropbox-item" data-action="spell-faceup">Spell/Trap - Face-up</div>
+        <div class="dropbox-item" data-action="spell-set">Spell/Trap - Set</div>
+    </div>
+
     <div id="dropbox-pile" class="dropbox hidden">
         <div class="dropbox-item" data-action="draw">Draw</div> 
         <div class="dropbox-item" data-action="shuffle">Shuffle</div>
@@ -275,6 +290,18 @@
         <div class="dropbox-item" data-action="to-deck-r">Send to Deck Random</div>
     </div>
 
+    <div id="lp-modifier" class="lp-modifier hidden">
+        <div class="lp-modifier-container">
+            <div class="lp-modifier-header">Modify LP</div>
+            <div class="lp-modifier-input-container">
+                <input id="lp-modifier-input" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter amount">
+            </div>
+            <div class="lp-modifier-buttons">
+                <button id="lp-modifier-add" class="lp-modifier-button" data-action="add">Add</button>
+                <button id="lp-modifier-subtract" class="lp-modifier-button" data-action="subtract">Subtract</button>
+            </div>
+        </div>
+    </div>
    
 
 <script type="module" src="js/main.js"></script>    

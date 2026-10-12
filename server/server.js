@@ -11,11 +11,13 @@ const contentTypes = {
     '.html': 'text/html',
     '.css': 'text/css',
     '.js': 'text/javascript',
-    '.jpg': 'image/jpeg'
+    '.jpg': 'image/jpeg',
+    '.svg': 'image/svg+xml'
 };
 
 const rooms = new Map();
 const sessions = new Map();
+const validPhases = new Set(['DP', 'SP', 'M1', 'BP', 'M2', 'EP']);
 
 const cardCatalogData = JSON.parse(
     fs.readFileSync(path.join(__dirname, 'data', 'cards.json'), 'utf8')
@@ -35,28 +37,28 @@ function createRoomGameState() {
     const gameState = new GameState();
 
     for (let i = 0; i < 40; i++) {
-        const card = new GameCard(cardCatalog.get(deckCards[i % deckCards.length]))
+        const card = new GameCard(cardCatalog.get(deckCards[i % deckCards.length]), 'player1')
         card.moveToLocation('deck');
         card.changeVisibility(false);
         gameState.player.deck.push(card);
     }
 
     for (let i = 0; i < 40; i++) {
-        const card = new GameCard(cardCatalog.get(deckCardsOpp[i % deckCardsOpp.length]));
+        const card = new GameCard(cardCatalog.get(deckCardsOpp[i % deckCardsOpp.length]), 'player2');
         card.moveToLocation('deck');
         card.changeVisibility(false);
         gameState.opponent.deck.push(card);
     } 
 
     for (let i = 0; i < 15; i++) {
-        const card = new GameCard(cardCatalog.get(extraDeckCards[i % extraDeckCards.length]));
+        const card = new GameCard(cardCatalog.get(extraDeckCards[i % extraDeckCards.length]), 'player1');
         card.moveToLocation('extradeck');
         card.changeVisibility(false);
         gameState.player.extradeck.push(card);
     }
 
     for (let i = 0; i < 15; i++) {
-        const card = new GameCard(cardCatalog.get(extraDeckCardsOpp[i % extraDeckCardsOpp.length]));
+        const card = new GameCard(cardCatalog.get(extraDeckCardsOpp[i % extraDeckCardsOpp.length]), 'player2');
         card.moveToLocation('extradeck');
         card.changeVisibility(false);
         gameState.opponent.extradeck.push(card);
@@ -87,11 +89,22 @@ function findCard(playerState, instanceId) {
             card => card.instanceId === instanceId
         );
         if (material) return material;
+
+        const attachedMaterial = zone.card?.attachedMaterials?.find(
+            card => card.instanceId === instanceId
+        );
+        if (attachedMaterial) return attachedMaterial;
     }
 
-    return Object.values(playerState.spellTrapZones).find(
-        card => card?.instanceId === instanceId
-    ) || null;
+    for (const card of Object.values(playerState.spellTrapZones)) {
+        if (card?.instanceId === instanceId) return card;
+        const attachedMaterial = card?.attachedMaterials?.find(
+            material => material.instanceId === instanceId
+        );
+        if (attachedMaterial) return attachedMaterial;
+    }
+
+    return null;
 }
 
 const server = http.createServer(async (request, response) => {
@@ -161,6 +174,92 @@ const server = http.createServer(async (request, response) => {
         return;
     }
 
+    if (request.method === 'POST' && url.pathname === '/api/phase') {
+        const sessionId = url.searchParams.get('sessionId');
+        const phase = url.searchParams.get('phase');
+        const session = sessions.get(sessionId);
+
+        if (!session) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Unknown session' }));
+            return;
+        }
+
+        if (!validPhases.has(phase)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Invalid duel phase' }));
+            return;
+        }
+
+        const room = rooms.get(session.roomId);
+        room.gameState.phase = phase;
+
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ ok: true, phase }));
+        return;
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/lp') {
+        const chunks = [];
+
+        for await (const chunk of request) {
+            chunks.push(chunk);
+        }
+
+        let payload;
+        try {
+            payload = JSON.parse(Buffer.concat(chunks).toString());
+        } catch {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Invalid JSON body' }));
+            return;
+        }
+
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Invalid LP update' }));
+            return;
+        }
+
+        const session = sessions.get(payload.sessionId);
+        if (!session) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Unknown session' }));
+            return;
+        }
+
+        if (!['player', 'opponent'].includes(payload.target) ||
+            !['add', 'subtract'].includes(payload.action) ||
+            !Number.isSafeInteger(payload.amount) || payload.amount <= 0) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Invalid LP update' }));
+            return;
+        }
+
+        const room = rooms.get(session.roomId);
+        const ownState = session.role === 'player1'
+            ? room.gameState.player
+            : room.gameState.opponent;
+        const otherState = ownState === room.gameState.player
+            ? room.gameState.opponent
+            : room.gameState.player;
+        const targetState = payload.target === 'player' ? ownState : otherState;
+        const newLP = payload.action === 'add'
+            ? targetState.lp + payload.amount
+            : Math.max(0, targetState.lp - payload.amount);
+
+        if (!Number.isSafeInteger(newLP)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'LP total is out of range' }));
+            return;
+        }
+
+        targetState.lp = newLP;
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ ok: true, target: payload.target, lp: newLP }));
+        return;
+    }
+
     if (request.method === 'POST' && url.pathname === '/api/draw') {
         const sessionId = url.searchParams.get('sessionId');
         const session = sessions.get(sessionId);
@@ -224,37 +323,71 @@ const server = http.createServer(async (request, response) => {
         try {
             const isTargetCardAction = payload.ruleName === 'targetCard';
 
-            const args = payload.args.map(argument => {
-                if (argument && typeof argument === 'object' && argument.instanceId) {
-                    let card = findCard(playerState, argument.instanceId);
-
-                    if (!card && isTargetCardAction) {
-                        const opponentState = session.role === 'player1'
-                            ? room.gameState.opponent
-                            : room.gameState.player;
-
-                        card = findCard(opponentState, argument.instanceId);
-                    }
-
-                    if (!card) {
-                        throw new Error(
-                            isTargetCardAction
-                                ? 'Target card was not found'
-                                : 'Card does not belong to this player'
-                        );
-                    }
-
-                    return card;
+            if (payload.ruleName === 'stealCard') {
+                if (payload.args.length !== 3 || !payload.args[0]?.instanceId) {
+                    throw new Error('A card, destination zone, and position are required');
                 }
-                return argument;
-            });
 
-            if (payload.ruleName === 'clearTargets') {
-                rule(room.gameState, session.role);
-            } else if (isTargetCardAction) {
-                rule(playerState, ...args, session.role);
+                const opponentState = session.role === 'player1'
+                    ? room.gameState.opponent
+                    : room.gameState.player;
+                const card = findCard(opponentState, payload.args[0].instanceId);
+                if (!card) throw new Error('Opponent card was not found');
+
+                rule(playerState, card, payload.args[1], payload.args[2], room.gameState);
             } else {
-                rule(playerState, ...args);
+                const args = payload.args.map(argument => {
+                    if (argument && typeof argument === 'object' && argument.instanceId) {
+                        let card = findCard(playerState, argument.instanceId);
+
+                        if (!card && isTargetCardAction) {
+                            const opponentState = session.role === 'player1'
+                                ? room.gameState.opponent
+                                : room.gameState.player;
+
+                            card = findCard(opponentState, argument.instanceId);
+                        }
+
+                        if (!card) {
+                            throw new Error(
+                                isTargetCardAction
+                                    ? 'Target card was not found'
+                                    : 'Card does not belong to this player'
+                            );
+                        }
+
+                        return card;
+                    }
+                    return argument;
+                });
+
+                if (payload.ruleName === 'clearTargets') {
+                    rule(room.gameState, session.role);
+                } else if (isTargetCardAction) {
+                    rule(playerState, ...args, session.role);
+                } else if (payload.ruleName === 'placeToken') {
+                    rule(playerState, ...args, session.role);
+                } else if (payload.ruleName === 'sendCardToBanish') {
+                    if (args.length === 1) {
+                        rule(playerState, args[0], true, room.gameState);
+                    } else {
+                        rule(playerState, ...args, room.gameState);
+                    }
+                } else if ([
+                    'summonMonsterCard',
+                    'setMonsterCard',
+                    'activateSpellTrapCard',
+                    'sendCardToGraveyard',
+                    'sendCardToDeck',
+                    'sendCardToExtraDeck',
+                    'sendCardToHand',
+                    'attachCard',
+                    'xyzSummon'
+                ].includes(payload.ruleName)) {
+                    rule(playerState, ...args, room.gameState);
+                } else {
+                    rule(playerState, ...args);
+                }
             }
         } catch (error) {
             response.writeHead(400, { 'Content-Type': 'application/json' });
