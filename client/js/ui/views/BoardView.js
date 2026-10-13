@@ -2,13 +2,13 @@ const MAX_MONSTERS = 7;
 const MAX_EXTRAMONSTERS = 2;
 const MAX_SPELLS = 6;
 
-export function highlightValidMonsterZones(state, isSetting) {
+export function highlightValidMonsterZones(state, isAttackPosition) {
     for (let i = 1; i <= MAX_MONSTERS - MAX_EXTRAMONSTERS; i++) {
         const zoneKey = `m${i}`;
         const zoneData = state.player.monsterZones[zoneKey];
 
         if (zoneData.card === null) {
-            const targetDom = document.getElementById(isSetting ? `${zoneKey}-set` : zoneKey);
+            const targetDom = document.getElementById(isAttackPosition ? zoneKey : `${zoneKey}-set`);
             if (targetDom) targetDom.classList.add('valid-target');
         }
     }
@@ -23,12 +23,12 @@ export function highlightValidMonsterZones(state, isSetting) {
     let targetDom = null;
 
     if (zoneDataLeft.card === null && zoneDataRightOpp.card === null) {
-        targetDom = document.getElementById(isSetting ? `${zoneKeyLeft}-set` : zoneKeyLeft);
+        targetDom = document.getElementById(isAttackPosition ? zoneKeyLeft : `${zoneKeyLeft}-set`);
         if (targetDom) targetDom.classList.add('valid-target');
     }
 
     if (zoneDataRight.card === null && zoneDataLeftOpp.card === null) {
-        targetDom = document.getElementById(isSetting ? `${zoneKeyRight}-set` : zoneKeyRight);
+        targetDom = document.getElementById(isAttackPosition ? zoneKeyRight : `${zoneKeyRight}-set`);
         if (targetDom) targetDom.classList.add('valid-target');
     }
 }

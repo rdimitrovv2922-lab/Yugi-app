@@ -27,9 +27,27 @@ function findCardAnchor(entry, includeWindow = false) {
 
 function copyRect(element) {
     if (!element) return null;
-    const { left, top, width, height } = element.getBoundingClientRect();
-    if (!width || !height) return null;
-    return { left, top, width, height };
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+
+    const transform = getComputedStyle(element).transform;
+    let angle = 0;
+    if (transform && transform !== 'none') {
+        const matrix = new DOMMatrixReadOnly(transform);
+        angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+    }
+
+    const isQuarterTurn = Math.abs(Math.sin(angle * (Math.PI / 180))) > 0.5;
+    const width = isQuarterTurn ? rect.height : rect.width;
+    const height = isQuarterTurn ? rect.width : rect.height;
+
+    return {
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+        width,
+        height,
+        angle
+    };
 }
 
 export function captureCardPosition(entry) {
@@ -83,8 +101,8 @@ export function animateCardMove({ card, sourceEntry, destinationEntry, sourceRec
     const flight = document.createElement('div');
     flight.className = 'card-transfer-animation';
     Object.assign(flight.style, {
-        left: `${sourceRect.left}px`,
-        top: `${sourceRect.top}px`,
+        left: `${sourceRect.centerX - sourceRect.width / 2}px`,
+        top: `${sourceRect.centerY - sourceRect.height / 2}px`,
         width: `${sourceRect.width}px`,
         height: `${sourceRect.height}px`
     });
@@ -107,9 +125,9 @@ export function animateCardMove({ card, sourceEntry, destinationEntry, sourceRec
         flip.appendChild(front);
     }
 
-    const sourceAngle = sourceVisible ? 180 : 0;
-    const destinationAngle = destinationVisible ? 180 : 0;
-    flip.style.transform = `rotateY(${sourceAngle}deg)`;
+    const sourceFlipAngle = sourceVisible ? 180 : 0;
+    const destinationFlipAngle = destinationVisible ? 180 : 0;
+    flip.style.transform = `rotateY(${sourceFlipAngle}deg)`;
     flight.appendChild(flip);
     document.body.appendChild(flight);
     if (typeof flight.animate !== 'function') {
@@ -118,24 +136,24 @@ export function animateCardMove({ card, sourceEntry, destinationEntry, sourceRec
     }
 
     const shouldHideDestination = !destinationEntry.isMaterial;
-    if (shouldHideDestination) hideDestination(destination);
+    const destinationImage = destination.querySelector(':scope > img') || destination;
+    if (shouldHideDestination) hideDestination(destinationImage);
 
-    const deltaX = end.left - sourceRect.left;
-    const deltaY = end.top - sourceRect.top;
-    const scaleX = end.width / sourceRect.width;
-    const scaleY = end.height / sourceRect.height;
+    const deltaX = end.centerX - sourceRect.centerX;
+    const deltaY = end.centerY - sourceRect.centerY;
+    const scale = end.width / sourceRect.width;
     const movement = flight.animate([
-        { transform: 'translate(0, 0) scale(1, 1)' },
-        { transform: `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})` }
+        { transform: `translate(0, 0) rotate(${sourceRect.angle}deg) scale(1)` },
+        { transform: `translate(${deltaX}px, ${deltaY}px) rotate(${end.angle}deg) scale(${scale})` }
     ], {
         duration: 650,
         easing: 'cubic-bezier(0.22, 0.75, 0.25, 1)',
         fill: 'forwards'
     });
-    const reveal = sourceAngle !== destinationAngle
+    const reveal = sourceFlipAngle !== destinationFlipAngle
         ? flip.animate([
-            { transform: `rotateY(${sourceAngle}deg)` },
-            { transform: `rotateY(${destinationAngle}deg)` }
+            { transform: `rotateY(${sourceFlipAngle}deg)` },
+            { transform: `rotateY(${destinationFlipAngle}deg)` }
         ], {
             duration: 650,
             easing: 'ease-in-out',
@@ -147,7 +165,7 @@ export function animateCardMove({ card, sourceEntry, destinationEntry, sourceRec
         .catch(() => {})
         .finally(() => {
             flight.remove();
-            if (shouldHideDestination) showDestination(destination);
+            if (shouldHideDestination) showDestination(destinationImage);
         });
 }
 

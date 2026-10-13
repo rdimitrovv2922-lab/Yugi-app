@@ -236,7 +236,7 @@ export default class InputController {
                     this.isSettingCard = !(this.activeCardInstance.isFaceUp);
                     this.isWaitingForMonsterZone = true;
                     this.isWaitingForSpellTrapZone = !this.activeCardInstance.isToken;
-                    BoardView.highlightValidMonsterZones(this.state, this.isSettingCard);
+                    BoardView.highlightValidMonsterZones(this.state, this.isAttackPosition);
                     if (this.isWaitingForSpellTrapZone) {
                         BoardView.highlightValidSpellTrapZones(this.state);
                     }
@@ -317,7 +317,7 @@ export default class InputController {
             
             this.hideWindow();
             this.isWaitingForMonsterZone = true;
-            BoardView.highlightValidMonsterZones(this.state, this.isSettingCard);
+            BoardView.highlightValidMonsterZones(this.state, this.isAttackPosition);
         });
     }
 
