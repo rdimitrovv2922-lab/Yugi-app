@@ -113,24 +113,34 @@ function findCardMoves(previousLocations, currentLocations) {
 const state = new GameState();
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const roomId = new URLSearchParams(location.search).get('room') || 'demo';
-    const joinResponse = await fetch(`/api/join?room=${encodeURIComponent(roomId)}`);
-    const joinInfo = await joinResponse.json();
+    const roomCode = new URLSearchParams(location.search).get('room');
 
-    if (!joinResponse.ok) {
-        console.error('Could not join room:', joinInfo.error);
+    if (!roomCode) {
+        window.alert('Open the game board from an active room.');
         return;
     }
 
-    sessionStorage.setItem('yugiSessionId', joinInfo.sessionId);
+    const roomResponse = await fetch(
+        `/api/rooms/${encodeURIComponent(roomCode)}/state`
+    );
+    const roomInfo = await roomResponse.json();
+
+    if (!roomResponse.ok) {
+        console.error('Could not load room:', roomInfo.error);
+        window.alert(roomInfo.error || 'Could not load this room.');
+        return;
+    }
+
+    const joinInfo = { role: roomInfo.role };
+    sessionStorage.setItem('yugiRoomCode', roomCode);
     sessionStorage.setItem('yugiRole', joinInfo.role);
+
     state.viewerRole = joinInfo.role;
-    console.log(`Joined room ${roomId} as ${joinInfo.role}`);
+    console.log(`Joined room ${roomCode} as ${joinInfo.role}`);
 
     document.querySelector('.end-turn-button').addEventListener('click', async () => {
-        const sessionId = sessionStorage.getItem('yugiSessionId');
         const response = await fetch(
-            `/api/end-turn?sessionId=${encodeURIComponent(sessionId)}`,
+            `/api/rooms/${encodeURIComponent(roomCode)}/end-turn`,
             { method: 'POST' }
         );
         const result = await response.json();
@@ -144,17 +154,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.querySelector('.remove-target-button').addEventListener('click', async () => {
-        const sessionId = sessionStorage.getItem('yugiSessionId');
-
-        const response = await fetch('/api/action', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId,
-                ruleName: 'clearTargets',
-                args: []
-            })
-        });
+        const response = await fetch(
+            `/api/rooms/${encodeURIComponent(roomCode)}/action`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ruleName: 'clearTargets', args: [] })
+            }
+        );
 
         const result = await response.json();
 
@@ -172,12 +179,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function refreshTurn() {
         const response = await fetch(
-            `/api/state?room=${encodeURIComponent(roomId)}`
+            `/api/rooms/${encodeURIComponent(roomCode)}/state`
         );
 
         if (!response.ok) return;
 
-        const gameState = await response.json();
+        const result = await response.json();
+        const gameState = result.gameState;
 
         const ownLP = joinInfo.role === 'player1'
             ? gameState.player.lp
@@ -234,9 +242,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await refreshTurn();
+    let isRefreshing = false;
     setInterval(() => {
-        refreshTurn().catch(error => console.error('Could not refresh turn:', error));
-    }, 1000);
+        if (isRefreshing) return;
+        isRefreshing = true;
+        refreshTurn()
+            .catch(error => console.error('Could not refresh turn:', error))
+            .finally(() => {
+                isRefreshing = false;
+            });
+    }, 500);
     
     const inputController = new InputController(state);
     renderBoard(state);

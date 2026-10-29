@@ -1,0 +1,131 @@
+:root {
+    color-scheme: dark;
+    font-family: Arial, sans-serif;
+    color: #e5e9f2;
+    background: #0A1128;
+    --page-bg: #0A1128;
+    --panel-bg: linear-gradient(155deg, #141d2d, #0a1128 75%);
+    --panel-inset: linear-gradient(145deg, #171f2e, #101522);
+    --field-bg: #101522;
+    --raised-bg: linear-gradient(145deg, #26364b, #111a29);
+    --raised-hover-bg: linear-gradient(145deg, #344a64, #172438);
+    --gold: #d4af37;
+    --gold-bright: #f0cf55;
+    --text-main: #e5e9f2;
+    --text-muted: #dce5f2;
+    --accent-blue: #4e9cff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 16px;
+    background: var(--page-bg);
+    color: var(--text-main);
+    font-family: Arial, sans-serif;
+}
+
+main {
+    width: min(100%, 760px);
+    margin: 0 auto;
+}
+
+h1,
+h2 {
+    margin-top: 0;
+    color: var(--gold-bright);
+}
+
+h1 {
+    text-align: center;
+}
+
+#account-status,
+#account-message {
+    min-height: 1.5em;
+    text-align: center;
+}
+
+#account-forms {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+form,
+#signed-in-panel {
+    display: grid;
+    gap: 12px;
+    padding: 24px;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    background: var(--panel-bg);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%),
+                0 10px 28px rgb(0 0 0 / 48%),
+                0 0 14px rgb(212 175 55 / 10%);
+}
+
+label {
+    margin-bottom: -8px;
+    color: var(--text-muted);
+}
+
+input {
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+    border: 1px solid #667085;
+    border-radius: 6px;
+    background: var(--field-bg);
+    color: var(--text-main);
+    font: inherit;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+}
+
+input:focus-visible {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgb(212 175 55 / 20%);
+}
+
+button,
+a {
+    justify-self: start;
+    padding: 9px 14px;
+    border: 2px solid var(--accent-blue);
+    border-radius: 9px;
+    background: var(--raised-bg);
+    color: #f5f7fb;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+button:hover,
+a:hover {
+    transform: translateY(-1px);
+    background: var(--raised-hover-bg);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%),
+                0 7px 16px rgb(0 0 0 / 42%);
+}
+
+#signed-in-panel[hidden] {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    #account-forms {
+        grid-template-columns: 1fr;
+    }
+}

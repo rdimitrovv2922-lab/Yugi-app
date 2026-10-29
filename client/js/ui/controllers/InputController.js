@@ -37,17 +37,17 @@ export default class InputController {
     }
 
     runRule(ruleName, ...args) {
-        const sessionId = sessionStorage.getItem('yugiSessionId');
+        const roomCode = sessionStorage.getItem('yugiRoomCode');
         const serializedArgs = args.map(argument =>
             argument && typeof argument === 'object' && argument.instanceId
                 ? { instanceId: argument.instanceId }
                 : argument
         );
 
-        fetch('/api/action', {
+        fetch(`/api/rooms/${encodeURIComponent(roomCode)}/action`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId, ruleName, args: serializedArgs })
+            body: JSON.stringify({ ruleName, args: serializedArgs })
         })
             .then(async response => {
                 const result = await response.json();
@@ -138,11 +138,11 @@ export default class InputController {
     }
 
     async changePhase(phaseCode) {
-        const sessionId = sessionStorage.getItem('yugiSessionId');
+        const roomCode = sessionStorage.getItem('yugiRoomCode');
 
         try {
             const response = await fetch(
-                `/api/phase?sessionId=${encodeURIComponent(sessionId)}&phase=${encodeURIComponent(phaseCode)}`,
+                `/api/rooms/${encodeURIComponent(roomCode)}/phase?phase=${encodeURIComponent(phaseCode)}`,
                 { method: 'POST' }
             );
             const result = await response.json();
@@ -268,12 +268,8 @@ export default class InputController {
                     break;
                 case 'reveal':
                     this.runRule('revealCard', this.activeCardInstance);
-                    //let currentCard = this.activeCardInstance;
                     this.resetInteractionState();
-                    Renderer.renderBoard(this.state);
-                    /*setTimeout(() => {
-                        this.runRule('hideCard', currentCard);
-                    }, 5000);*/
+                    Renderer.renderBoard(this.state);  
                     break;
                 case 'hide':
                     this.runRule('hideCard', this.activeCardInstance);
@@ -688,7 +684,7 @@ export default class InputController {
             this.clearInteractionState();
             this.isWaitingForToken = true;
             document.getElementById('place-token-button').setAttribute('aria-pressed', 'true');
-            BoardView.highlightValidMonsterZones(this.state, false);
+            BoardView.highlightValidMonsterZones(this.state, true);
         });
     }
 

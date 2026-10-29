@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yugi — Deck Builder</title>
+    <link rel="stylesheet" href="deck-builder.css">
+</head>
+<body>
+    <main id="deck-builder">
+        <header class="page-header">
+            <a href="/">Back to account</a>
+            <h1>Deck Builder</h1>
+        </header>
+
+        <div class="deck-builder-layout">
+            <aside id="card-preview" class="card-preview" aria-label="Card preview">
+                <h2 id="card-preview-name">Card preview</h2>
+                <img id="card-preview-image" alt="" hidden>
+                <div id="card-preview-details"></div>
+                <p id="card-preview-dsc">Hover over a card to see its details.</p>
+            </aside>
+
+            <section id="deck-workspace" aria-label="Your deck">
+                <div class="saved-deck-controls">
+                    <label for="saved-deck-select">Saved decks</label>
+                    <div class="saved-deck-actions">
+                        <select id="saved-deck-select" disabled>
+                            <option value="">Saved decks will appear here</option>
+                        </select>
+                        <button id="load-deck-button" type="button" disabled>
+                            Load deck
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="deck-form">
+                    <div class="deck-name-field">
+                        <label for="deck-name">Deck name</label>
+                        <input
+                            id="deck-name"
+                            name="name"
+                            type="text"
+                            maxlength="40"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div id="deck-sections">
+                        <section class="deck-section" aria-labelledby="main-deck-heading">
+                            <div class="deck-section-heading">
+                                <h2 id="main-deck-heading">Main Deck</h2>
+                                <span><span id="main-count">0</span> / 40–60</span>
+                            </div>
+                            <div
+                                id="main-deck-cards"
+                                class="card-window main-card-window"
+                                data-section="main"
+                                data-empty-message="Drag Main Deck cards here"
+                                role="list"
+                                aria-label="Main Deck cards"
+                            ></div>
+                        </section>
+
+                        <section class="deck-section" aria-labelledby="extra-deck-heading">
+                            <div class="deck-section-heading">
+                                <h2 id="extra-deck-heading">Extra Deck</h2>
+                                <span><span id="extra-count">0</span> / 15</span>
+                            </div>
+                            <div
+                                id="extra-deck-cards"
+                                class="card-window auxiliary-card-window"
+                                data-section="extra"
+                                data-empty-message="Drag Extra Deck cards here"
+                                role="list"
+                                aria-label="Extra Deck cards"
+                            ></div>
+                        </section>
+
+                        <section class="deck-section" aria-labelledby="side-deck-heading">
+                            <div class="deck-section-heading">
+                                <h2 id="side-deck-heading">Side Deck</h2>
+                                <span><span id="side-count">0</span> / 15</span>
+                            </div>
+                            <div
+                                id="side-deck-cards"
+                                class="card-window auxiliary-card-window"
+                                data-section="side"
+                                data-empty-message="Drag Side Deck cards here"
+                                role="list"
+                                aria-label="Side Deck cards"
+                            ></div>
+                        </section>
+                    </div>
+
+                    <div class="deck-save-row">
+                        <p id="deck-save-status" role="status"></p>
+                        <button id="save-deck-button" type="submit" disabled>
+                            Save deck
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <aside id="card-search-panel" aria-labelledby="card-search-heading">
+                <h2 id="card-search-heading">Find a card</h2>
+                <label for="card-search">Search by card name</label>
+                <input
+                    id="card-search"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Type at least 2 characters"
+                >
+                <p id="card-search-status" role="status">Enter a card name to search.</p>
+                <div id="card-results" role="list" aria-live="polite"></div>
+            </aside>
+        </div>
+    </main>
+
+    <script type="module" src="js/deck-builder.js"></script>
+</body>
+</html>

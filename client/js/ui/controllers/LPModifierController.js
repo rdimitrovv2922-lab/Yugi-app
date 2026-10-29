@@ -108,16 +108,16 @@ export default class LPModifierController {
         input.setCustomValidity('');
 
         try {
-            const response = await fetch('/api/lp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionId: sessionStorage.getItem('yugiSessionId'),
-                    target,
-                    action,
-                    amount
-                })
-            });
+            const roomCode = sessionStorage.getItem('yugiRoomCode');
+
+            const response = await fetch(
+                `/api/rooms/${encodeURIComponent(roomCode)}/lp`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target, action, amount })
+                }
+            );
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'LP update failed');
 

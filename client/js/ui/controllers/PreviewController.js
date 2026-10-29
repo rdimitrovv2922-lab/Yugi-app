@@ -1,4 +1,5 @@
 import { CARD_BACK_URL } from '../rendering/opRenderer.js';
+import { getLevelOrLinkDetail } from '../cardDetails.js';
 
 export default class PreviewController {
     constructor() {
@@ -16,11 +17,7 @@ export default class PreviewController {
     showCard(card) {
         const data = card.rawApiData || {};
 
-        const levelOrLink = data.level !== undefined
-            ? `Level / Rank: ${data.level}`
-            : data.linkval !== undefined
-                ? `Link: ${data.linkval}`
-                : null;
+        const levelOrLink = getLevelOrLinkDetail(data);
 
         const rows = [
             { values: [data.type], fullWidth: true },

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yugi — Account</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <main>
+        <h1>Yugi</h1>
+        <p id="account-status" role="status">Checking sign-in…</p>
+
+        <section id="account-forms" aria-label="Account forms">
+            <form id="register-form">
+                <h2>Create account</h2>
+
+                <label for="register-username">Username</label>
+                <input id="register-username" name="username"
+                    type="text" minlength="3" maxlength="24"
+                    pattern="[a-zA-Z0-9_]+" autocomplete="username" required>
+
+                <label for="register-display-name">Display name</label>
+                <input id="register-display-name" name="displayName"
+                    type="text" maxlength="30" autocomplete="nickname" required>
+
+                <label for="register-password">Password</label>
+                <input id="register-password" name="password"
+                    type="password" minlength="8"
+                    autocomplete="new-password" required>
+
+                <button type="submit">Register</button>
+            </form>
+
+            <form id="login-form">
+                <h2>Log in</h2>
+
+                <label for="login-username">Username</label>
+                <input id="login-username" name="username"
+                    type="text" autocomplete="username" required>
+
+                <label for="login-password">Password</label>
+                <input id="login-password" name="password"
+                    type="password" autocomplete="current-password" required>
+
+                <button type="submit">Log in</button>
+            </form>
+        </section>
+
+        <section id="signed-in-panel" hidden>
+            <p id="account-user"></p>
+            <a href="deck-builder.html">Build a deck</a>
+            <a href="game-board.html">Open game board</a>
+            <button id="logout-button" type="button">Log out</button>
+        </section>
+
+        <p id="account-message" role="alert"></p>
+    </main>
+<script type="module" src="js/accounts.js"></script>
+</body>
+</html>
