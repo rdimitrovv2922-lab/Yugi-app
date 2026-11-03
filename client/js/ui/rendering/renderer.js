@@ -1,5 +1,5 @@
 import { CARD_BACK_URL } from '../cardAssets.js';
-import { getLinkRatingDetail } from '../cardDetails.js';
+import { getAttackDefenseDisplay } from '../cardDetails.js';
 import { renderOpponentBoard } from './opRenderer.js';
 
 export function renderDeck(gameState) {
@@ -79,8 +79,7 @@ export function renderMonsterZones(gameState) {
 
         const indicator = document.createElement('div');
         indicator.className = 'atk-def-indicator';
-        indicator.textContent = getLinkRatingDetail(cardData) ||
-            `${cardData.atk ?? '?'} / ${cardData.def ?? '?'}`;
+        indicator.textContent = getAttackDefenseDisplay(cardData);
 
         monsterWrapper?.appendChild(indicator);
 

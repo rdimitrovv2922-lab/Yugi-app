@@ -1,19 +1,19 @@
 :root {
     color-scheme: dark;
-    font-family: Arial, sans-serif;
+    font-family: "Trebuchet MS", Arial, sans-serif;
     color: #e5e9f2;
     background: #0A1128;
     --page-bg: #0A1128;
-    --panel-bg: linear-gradient(155deg, #141d2d, #0a1128 75%);
-    --panel-inset: linear-gradient(145deg, #171f2e, #101522);
-    --field-bg: #101522;
-    --raised-bg: linear-gradient(145deg, #26364b, #111a29);
-    --raised-hover-bg: linear-gradient(145deg, #344a64, #172438);
+    --panel-bg: linear-gradient(155deg, #17253a, #101a2b 72%);
+    --panel-inset: linear-gradient(145deg, #1b2a3e, #111c2d);
+    --field-bg: #0c1525;
+    --raised-bg: #26364b;
+    --raised-hover-bg: #344a64;
     --gold: #d4af37;
     --gold-bright: #f0cf55;
     --text-main: #e5e9f2;
-    --text-muted: #dce5f2;
-    --accent-blue: #4e9cff;
+    --text-muted: #b8c6d9;
+    --accent-blue: #65b5ff;
 }
 
 * {
@@ -25,7 +25,10 @@ body {
     min-height: 100vh;
     margin: 0;
     padding: 18px;
-    background: var(--page-bg);
+    background:
+        linear-gradient(rgb(10 17 40 / 86%), rgb(10 17 40 / 90%)),
+        url("assets/yugi-background.png") center / cover no-repeat fixed;
+    background-color: var(--page-bg);
 }
 
 button,
@@ -62,10 +65,10 @@ input {
     display: inline-flex;
     align-items: center;
     padding: 9px 14px;
-    color: #f5f7fb;
+    color: #fff6d6;
     background: var(--raised-bg);
-    border: 2px solid var(--accent-blue);
-    border-radius: 9px;
+    border: 1px solid rgb(240 207 85 / 72%);
+    border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
     transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
@@ -74,7 +77,8 @@ input {
 .page-header a:hover {
     transform: translateY(-1px);
     background: var(--raised-hover-bg);
-    box-shadow: 0 7px 16px rgb(0 0 0 / 42%);
+    border-color: var(--gold-bright);
+    box-shadow: 0 7px 18px rgb(0 0 0 / 32%);
 }
 
 .deck-builder-layout {
@@ -90,12 +94,11 @@ input {
     min-width: 0;
     padding: 16px;
     color: var(--text-main);
-    border: 1px solid var(--gold);
-    border-radius: 10px;
+    border: 1px solid rgb(212 175 55 / 48%);
+    border-radius: 14px;
     background: var(--panel-bg);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%),
-                0 10px 28px rgb(0 0 0 / 48%),
-                0 0 14px rgb(212 175 55 / 10%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%),
+                0 18px 42px rgb(0 0 0 / 34%);
 }
 
 .card-preview {
@@ -234,7 +237,7 @@ input {
 
 .saved-deck-actions {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 8px;
 }
@@ -248,8 +251,8 @@ input {
     min-height: 40px;
     padding: 9px 11px;
     color: var(--text-main);
-    border: 1px solid #667085;
-    border-radius: 6px;
+    border: 1px solid #465873;
+    border-radius: 8px;
     background: var(--field-bg);
 }
 
@@ -259,8 +262,8 @@ select {
     min-height: 40px;
     padding: 9px 11px;
     color: var(--text-main);
-    border: 1px solid #667085;
-    border-radius: 6px;
+    border: 1px solid #465873;
+    border-radius: 8px;
     background: var(--field-bg);
     font: inherit;
 }
@@ -277,7 +280,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible {
     border-color: var(--gold);
-    box-shadow: 0 0 0 2px rgb(212 175 55 / 20%);
+    box-shadow: 0 0 0 3px rgb(212 175 55 / 15%);
 }
 
 select:disabled {
@@ -287,6 +290,17 @@ select:disabled {
 
 #load-deck-button {
     white-space: nowrap;
+}
+
+.delete-deck-button:not(:disabled) {
+    color: #ffe3e5;
+    background: #43242c;
+    border-color: rgb(228 91 103 / 72%);
+}
+
+.delete-deck-button:hover:not(:disabled) {
+    background: #60313b;
+    border-color: #e45b67;
 }
 
 #deck-sections {
@@ -425,12 +439,11 @@ select:disabled {
 
 button {
     padding: 9px 14px;
-    color: #f5f7fb;
+    color: #fff6d6;
     background: var(--raised-bg);
-    border: 2px solid var(--accent-blue);
-    border-radius: 9px;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%),
-                0 4px 12px rgb(0 0 0 / 35%);
+    border: 1px solid rgb(240 207 85 / 72%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
     font-weight: 700;
     cursor: pointer;
     transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
@@ -439,8 +452,8 @@ button {
 button:hover:not(:disabled) {
     transform: translateY(-1px);
     background: var(--raised-hover-bg);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%),
-                0 7px 16px rgb(0 0 0 / 42%);
+    border-color: var(--gold-bright);
+    box-shadow: 0 7px 18px rgb(0 0 0 / 32%);
 }
 
 .remove-copy-button:hover:not(:disabled) {

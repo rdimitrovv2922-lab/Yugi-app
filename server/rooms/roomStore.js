@@ -9,6 +9,32 @@ const findDeckOwnedByUser = db.prepare(`
     WHERE id = ? AND user_id = ?
 `);
 
+const findDeckForSnapshot = db.prepare(`
+    SELECT
+        decks.name AS deck_name,
+        deck_cards.card_id,
+        deck_cards.section,
+        deck_cards.quantity
+    FROM decks
+    LEFT JOIN deck_cards ON deck_cards.deck_id = decks.id
+    WHERE decks.id = ? AND decks.user_id = ?
+    ORDER BY deck_cards.section, deck_cards.card_id
+`);
+
+const insertRoomDeckSnapshot = db.prepare(`
+    INSERT INTO room_deck_snapshots (
+        room_id, user_id, source_deck_id, deck_name
+    )
+    VALUES (?, ?, ?, ?)
+`);
+
+const insertRoomDeckSnapshotCard = db.prepare(`
+    INSERT INTO room_deck_snapshot_cards (
+        room_id, user_id, card_id, section, quantity
+    )
+    VALUES (?, ?, ?, ?, ?)
+`);
+
 const findRoomByCode = db.prepare(`
     SELECT id
     FROM rooms
@@ -26,7 +52,8 @@ const insertRoomPlayer = db.prepare(`
 `);
 
 const findRoomForJoin = db.prepare(`
-    SELECT id, code, status
+    SELECT id, code, status, 
+    surrendered_by_user_id AS surrenderedByUserId
     FROM rooms
     WHERE code = ?
 `);
@@ -43,22 +70,36 @@ const updateRoomStatus = db.prepare(`
     WHERE id = ?
 `);
 
+const finishActiveRoom = db.prepare(`
+    UPDATE rooms
+    SET status = 'finished',
+        surrendered_by_user_id = ?
+    WHERE id = ? AND status = 'active'
+`);
+
 const findRoomPlayersWithDecks = db.prepare(`
     SELECT
         room_players.user_id AS user_id,
         room_players.seat AS seat,
-        room_players.deck_id AS deck_id,
-        decks.name AS deck_name,
+        room_deck_snapshots.source_deck_id AS deck_id,
+        room_deck_snapshots.deck_name AS deck_name,
         users.display_name AS display_name,
-        deck_cards.card_id AS card_id,
-        deck_cards.section AS section,
-        deck_cards.quantity AS quantity
+        room_deck_snapshot_cards.card_id AS card_id,
+        room_deck_snapshot_cards.section AS section,
+        room_deck_snapshot_cards.quantity AS quantity
     FROM room_players
-    JOIN decks ON decks.id = room_players.deck_id
     JOIN users ON users.id = room_players.user_id
-    LEFT JOIN deck_cards ON deck_cards.deck_id = room_players.deck_id
+    LEFT JOIN room_deck_snapshots
+        ON room_deck_snapshots.room_id = room_players.room_id
+        AND room_deck_snapshots.user_id = room_players.user_id
+    LEFT JOIN room_deck_snapshot_cards
+        ON room_deck_snapshot_cards.room_id = room_players.room_id
+        AND room_deck_snapshot_cards.user_id = room_players.user_id
     WHERE room_players.room_id = ?
-    ORDER BY room_players.seat, deck_cards.section, deck_cards.card_id
+    ORDER BY
+        room_players.seat,
+        room_deck_snapshot_cards.section,
+        room_deck_snapshot_cards.card_id
 `);
 
 const updateRoomGameState = db.prepare(`
@@ -72,6 +113,33 @@ const findRoomGameState = db.prepare(`
     FROM rooms
     WHERE id = ?
 `);
+
+function snapshotDeckForRoom({ roomId, userId, deckId }) {
+    const rows = findDeckForSnapshot.all(deckId, userId);
+
+    if (rows.length === 0) {
+        throw new Error('Deck not found or you do not own it.');
+    }
+
+    insertRoomDeckSnapshot.run(
+        roomId,
+        userId,
+        deckId,
+        rows[0].deck_name
+    );
+
+    for (const row of rows) {
+        if (row.card_id === null) continue;
+
+        insertRoomDeckSnapshotCard.run(
+            roomId,
+            userId,
+            row.card_id,
+            row.section,
+            row.quantity
+        );
+    }
+}
 
 function generateRoomCode() {
     let code = '';
@@ -115,6 +183,7 @@ function createRoom({ userId, deckId }) {
     try {
         insertRoom.run(roomId, code, userId);
         insertRoomPlayer.run(roomId, userId, deckId, 1);
+        snapshotDeckForRoom({ roomId, userId, deckId });
         db.exec('COMMIT');
 
         return {
@@ -173,6 +242,7 @@ function joinRoom({ userId, code, deckId }) {
         const seat = players.some(player => player.seat === 1) ? 2 : 1;
 
         insertRoomPlayer.run(room.id, userId, deckId, seat);
+        snapshotDeckForRoom({ roomId: room.id, userId, deckId });
 
         const status = players.length + 1 === 2 ? 'active' : 'waiting';
 
@@ -268,10 +338,16 @@ function getRoomGameState(roomId) {
     return JSON.parse(row.game_state_json);
 }
 
+function finishRoom(roomId, surrenderingUserId) {
+    const result = finishActiveRoom.run(surrenderingUserId, roomId);
+    return result.changes === 1;
+}
+
 module.exports = {
     createRoom,
     joinRoom,
     getRoomByCode,
     saveRoomGameState,
-    getRoomGameState
+    getRoomGameState,
+    finishRoom
 };

@@ -219,8 +219,16 @@
                 <button id="place-token-button" class="action-button token-button" type="button" aria-pressed="false"><span>Place<br>Token</span></button>
             </div>
 
-            <div id="remove-target">
-                <button class="action-button remove-target-button" type="button"><span>Remove<br>Target(s)</span></button>
+            <div id="room-action-controls">
+                <div id="remove-target">
+                    <button class="action-button remove-target-button" type="button"><span>Remove<br>Target(s)</span></button>
+                </div>
+
+                <div id="surrender-control">
+                    <button id="surrender-button" class="action-button surrender-button" type="button">
+                        <span>Surrender</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -304,6 +312,25 @@
         </div>
     </div>
    
+
+    <div
+        id="duel-result-overlay"
+        class="duel-result-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="duel-result-title"
+        aria-describedby="duel-result-message"
+        hidden
+    >
+        <section id="duel-result-panel" class="duel-result-panel" data-outcome="won">
+            <p class="duel-result-label">Duel complete</p>
+            <h2 id="duel-result-title">You won!</h2>
+            <p id="duel-result-message">Your opponent surrendered.</p>
+            <button id="return-to-menu-button" class="duel-result-button" type="button">
+                Return to menu
+            </button>
+        </section>
+    </div>
 
 <script type="module" src="js/main.js"></script>    
 </body>

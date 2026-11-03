@@ -26,12 +26,14 @@ async function requestJson(url, options = {}) {
 }
 
 function showSignedOut() {
+    document.body.classList.remove('is-signed-in');
     accountForms.hidden = false;
     signedInPanel.hidden = true;
     accountStatus.textContent = 'Not signed in.';
 }
 
 function showSignedIn(user) {
+    document.body.classList.add('is-signed-in');
     accountForms.hidden = true;
     signedInPanel.hidden = false;
     accountStatus.textContent = `Signed in as ${user.username}.`;

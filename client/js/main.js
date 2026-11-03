@@ -170,8 +170,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    const surrenderButton = document.getElementById('surrender-button');
+    
+    const resultOverlay = document.getElementById('duel-result-overlay');
+    const resultPanel = document.getElementById('duel-result-panel');
+    const resultTitle = document.getElementById('duel-result-title');
+    const resultMessage = document.getElementById('duel-result-message');
+
+    let roomIsFinished = false;
+
+    function showDuelResult(result) {
+        if (!result) return;
+
+        resultPanel.dataset.outcome = result.outcome;
+
+        if (result.outcome === 'won') {
+            resultTitle.textContent = 'You won!';
+            resultMessage.textContent = `${result.loserName} surrendered.`;
+        } else {
+            resultTitle.textContent = 'You lost';
+            resultMessage.textContent = 'You surrendered.';
+        }
+
+        resultOverlay.hidden = false;
+        surrenderButton.disabled = true;
+
+        roomIsFinished = true;
+    }
+
+    document.getElementById('return-to-menu-button').addEventListener('click', () => {
+        window.location.assign('/');
+    });
+
+    surrenderButton.addEventListener('click', async () => {
+        const confirmed = window.confirm(
+            'Surrender this duel? This will end the room for both players.'
+        );
+
+        if (!confirmed) return;
+
+        surrenderButton.disabled = true;
+
+        try {
+            const response = await fetch(
+                `/api/rooms/${encodeURIComponent(roomCode)}/surrender`,
+                { method: 'POST' }
+            );
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Could not surrender.');
+            }
+
+            const statusResponse = await fetch(
+                `/api/rooms/${encodeURIComponent(roomCode)}/status`
+            );
+            const roomStatus = await statusResponse.json();
+
+            if (!statusResponse.ok || !roomStatus.result) {
+                throw new Error(roomStatus.error || 'Could not load the duel result.');
+            }
+
+            showDuelResult(roomStatus.result);
+        } catch (error) {
+            window.alert(error.message);
+            surrenderButton.disabled = false;
+        }
+    });
+
     const turnLabel = document.getElementById('turn-number');
     const turnIndicator = document.getElementById('turn-indicator');
+    const playerNameLabel = document.querySelector('#player-info-box .player-name');
+    const opponentNameLabel = document.querySelector('#opponent-info-box .player-name');
     let currentTurn = null;
     let currentPhase = null;
 
@@ -182,10 +252,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             `/api/rooms/${encodeURIComponent(roomCode)}/state`
         );
 
-        if (!response.ok) return;
+        if (!response.ok) {
+            if (response.status === 409) {
+                const statusResponse = await fetch(
+                    `/api/rooms/${encodeURIComponent(roomCode)}/status`
+                );
+                const roomStatus = await statusResponse.json();
+
+                if (
+                    statusResponse.ok &&
+                    roomStatus.room?.status === 'finished' &&
+                    roomStatus.result
+                ) {
+                    showDuelResult(roomStatus.result);
+                }
+            }
+
+            return;
+        }
 
         const result = await response.json();
         const gameState = result.gameState;
+
+        if (result.playerNames) {
+            playerNameLabel.textContent = result.playerNames.player;
+            opponentNameLabel.textContent = result.playerNames.opponent;
+        }
 
         const ownLP = joinInfo.role === 'player1'
             ? gameState.player.lp
@@ -244,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await refreshTurn();
     let isRefreshing = false;
     setInterval(() => {
-        if (isRefreshing) return;
+        if (roomIsFinished || isRefreshing) return;
         isRefreshing = true;
         refreshTurn()
             .catch(error => console.error('Could not refresh turn:', error))

@@ -17,6 +17,11 @@ const findOwnedDeck = db.prepare(`
     WHERE id = ? AND user_id = ?
 `);
 
+const deleteDeckByOwner = db.prepare(`
+    DELETE FROM decks
+    WHERE id = ? AND user_id = ?
+`);
+
 const updateDeckName = db.prepare(`
     UPDATE decks
     SET name = ?, updated_at = CURRENT_TIMESTAMP
@@ -95,6 +100,11 @@ function updateDeck({ deckId, userId, name, cards }) {
     }
 }
 
+function deleteDeck({ deckId, userId }) {
+    const result = deleteDeckByOwner.run(deckId, userId);
+    return result.changes === 1;
+}
+
 function getDecksForUser(userId) {
     const rows = findDecksByUserId.all(userId);
     const decksById = new Map();
@@ -127,5 +137,6 @@ function getDecksForUser(userId) {
 module.exports = {
     createDeck,
     updateDeck,
+    deleteDeck,
     getDecksForUser
 };

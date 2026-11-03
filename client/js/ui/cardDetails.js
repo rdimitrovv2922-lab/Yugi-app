@@ -1,9 +1,23 @@
-export function getLinkRatingDetail(cardData) {
+function isLinkMonster(cardData) {
     const linkRating = cardData?.linkval;
-    const isLinkMonster = cardData?.frameType?.toLowerCase() === 'link' ||
+    return cardData?.frameType?.toLowerCase() === 'link' ||
         (linkRating !== undefined && linkRating !== null);
+}
 
-    return isLinkMonster ? `Link Rating: ${linkRating ?? '—'}` : null;
+export function getLinkRatingDetail(cardData) {
+    return isLinkMonster(cardData)
+        ? `Link Rating: ${cardData.linkval ?? '—'}`
+        : null;
+}
+
+export function getAttackDefenseDisplay(cardData) {
+    const attack = cardData?.atk ?? '?';
+
+    if (isLinkMonster(cardData)) {
+        return `${attack} / L${cardData?.linkval ?? '—'}`;
+    }
+
+    return `${attack} / ${cardData?.def ?? '?'}`;
 }
 
 export function getLevelOrLinkDetail(cardData) {

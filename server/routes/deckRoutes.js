@@ -1,4 +1,4 @@
-const { createDeck, updateDeck, getDecksForUser } = require('../decks/deckStore');
+const { createDeck, updateDeck, deleteDeck, getDecksForUser } = require('../decks/deckStore');
 const { validateDeckCards } = require('../decks/validation');
 const { cardCatalog } = require('../cards/cardCatalog');
 const { readJsonBody } = require('../http/requestBody');
@@ -171,6 +171,39 @@ async function handleDeckRoute(request, response, url) {
 
         return true;
     }
+
+    if (request.method === 'DELETE' && deckUpdateMatch) {
+        const user = getSignedInUser(request);
+
+        if (!user) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Not signed in' }));
+            return true;
+        }
+
+        try {
+            const wasDeleted = deleteDeck({
+                deckId: deckUpdateMatch[1],
+                userId: user.id
+            });
+
+            if (!wasDeleted) {
+                response.writeHead(404, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ error: 'Deck not found' }));
+                return true;
+            }
+
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ ok: true }));
+        } catch (error) {
+            console.error('Could not delete deck:', error);
+            response.writeHead(500, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Could not delete deck' }));
+        }
+
+        return true;
+    }
+    
     return false;
 }
 

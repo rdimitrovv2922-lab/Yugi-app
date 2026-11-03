@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yugi — Room Lobby</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="room-lobby.css">
+</head>
+<body>
+    <main id="room-lobby">
+        <header class="page-header">
+            <a href="/">Back to account</a>
+            <h1>Room Lobby</h1>
+        </header>
+
+        <p id="lobby-status" role="status">Checking sign-in…</p>
+
+        <section id="room-actions" aria-label="Create or join a room" hidden>
+            <form id="create-room-form">
+                <h2>Create a room</h2>
+                <label for="create-deck-select">Choose your deck</label>
+                <select id="create-deck-select" required disabled>
+                    <option value="">Loading saved decks…</option>
+                </select>
+                <button id="create-room-button" type="submit" disabled>
+                    Create room
+                </button>
+            </form>
+
+            <form id="join-room-form">
+                <h2>Join a room</h2>
+                <label for="room-code-input">Room code</label>
+                <input
+                    id="room-code-input"
+                    name="code"
+                    type="text"
+                    minlength="6"
+                    maxlength="6"
+                    pattern="[A-HJ-NP-Z2-9]{6}"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    required
+                >
+                <label for="join-deck-select">Choose your deck</label>
+                <select id="join-deck-select" required disabled>
+                    <option value="">Loading saved decks…</option>
+                </select>
+                <button id="join-room-button" type="submit" disabled>
+                    Join room
+                </button>
+            </form>
+        </section>
+
+        <section id="waiting-panel" aria-labelledby="waiting-heading" hidden>
+            <h2 id="waiting-heading">Waiting for another player</h2>
+            <p>Share this room code with the other player:</p>
+            <p id="room-code-display" class="room-code-display"></p>
+            <button id="copy-room-code-button" type="button">Copy code</button>
+            <p id="waiting-status" role="status">Checking room status…</p>
+        </section>
+
+        <p id="lobby-message" role="alert"></p>
+        <p id="deck-builder-prompt" hidden>
+            You need a saved deck before creating or joining a room.
+            <a href="deck-builder.html">Build a deck</a>
+        </p>
+    </main>
+    <script type="module" src="js/room-lobby.js"></script>
+</body>
+</html>

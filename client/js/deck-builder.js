@@ -13,6 +13,7 @@ const deckSaveStatus = document.querySelector('#deck-save-status');
 const saveDeckButton = document.querySelector('#save-deck-button');
 const savedDeckSelect = document.querySelector('#saved-deck-select');
 const loadDeckButton = document.querySelector('#load-deck-button');
+const deleteDeckButton = document.querySelector('#delete-deck-button');
 let savedDecks = [];
 let loadedDeckId = null;
 
@@ -467,6 +468,7 @@ deckForm.addEventListener('submit', async event => {
         await loadSavedDecks();
         savedDeckSelect.value = loadedDeckId;
         loadDeckButton.disabled = false;
+        deleteDeckButton.disabled = false;
         deckSaveStatus.textContent = `Saved “${result.deck.name}”.`;
     } catch (error) {
         deckSaveStatus.textContent = error.message;
@@ -476,6 +478,8 @@ deckForm.addEventListener('submit', async event => {
 });
 
 async function loadSavedDecks() {
+    loadDeckButton.disabled = true;
+    deleteDeckButton.disabled = true;
     savedDeckSelect.disabled = true;
     savedDeckSelect.replaceChildren();
 
@@ -523,7 +527,65 @@ async function loadSavedDecks() {
 }
 
 savedDeckSelect.addEventListener('change', () => {
-    loadDeckButton.disabled = savedDeckSelect.value === '';
+    const hasSelection = savedDeckSelect.value !== '';
+    loadDeckButton.disabled = !hasSelection;    
+    deleteDeckButton.disabled = !hasSelection;
+});
+
+deleteDeckButton.addEventListener('click', async () => {
+    const selectedDeck = savedDecks.find(
+        deck => deck.id === savedDeckSelect.value
+    );
+
+    if (!selectedDeck) return;
+
+    const confirmed = window.confirm(
+        `Delete “${selectedDeck.name}”? Room deck snapshots will be preserved.`
+    );
+
+    if (!confirmed) return;
+
+    const wasLoadedDeck = loadedDeckId === selectedDeck.id;
+
+    deleteDeckButton.disabled = true;
+    loadDeckButton.disabled = true;
+    savedDeckSelect.disabled = true;
+    deckSaveStatus.textContent = `Deleting “${selectedDeck.name}”…`;
+
+    try {
+        const response = await fetch(
+            `/api/decks/${encodeURIComponent(selectedDeck.id)}`,
+            { method: 'DELETE' }
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Could not delete deck.');
+        }
+
+        if (wasLoadedDeck) {
+            // Keep the current editor contents as an unsaved deck.
+            loadedDeckId = null;
+            lastSavedFingerprint = '';
+        }
+
+        await loadSavedDecks();
+
+        if (wasLoadedDeck) {
+            updateDeckCounts();
+            deckSaveStatus.textContent =
+                `Deleted “${selectedDeck.name}”. The editor contents are now an unsaved deck.`;
+        } else {
+            deckSaveStatus.textContent = `Deleted “${selectedDeck.name}”.`;
+        }
+    } catch (error) {
+        deckSaveStatus.textContent = error.message;
+    } finally {
+        const hasSelection = savedDeckSelect.value !== '';
+        savedDeckSelect.disabled = savedDecks.length === 0;
+        loadDeckButton.disabled = !hasSelection;
+        deleteDeckButton.disabled = !hasSelection;
+    }
 });
 
 loadDeckButton.addEventListener('click', async () => {

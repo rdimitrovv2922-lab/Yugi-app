@@ -4,7 +4,8 @@ const {
     joinRoom,
     getRoomByCode,
     saveRoomGameState,
-    getRoomGameState
+    getRoomGameState,
+    finishRoom
 } = require('../rooms/roomStore');
 const { cardCatalog } = require('../cards/cardCatalog');
 const { readJsonBody } = require('../http/requestBody');
@@ -147,6 +148,121 @@ async function handleRoomRoute(request, response, url) {
         return true;
     }
 
+    const roomStatusMatch = url.pathname.match(
+        /^\/api\/rooms\/([^/]+)\/status$/
+    );
+
+    if (request.method === 'GET' && roomStatusMatch) {
+        const user = getSignedInUser(request);
+
+        if (!user) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Not signed in' }));
+            return true;
+        }
+
+        const room = getRoomByCode(roomStatusMatch[1]);
+
+        if (!room) {
+            response.writeHead(404, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Room not found' }));
+            return true;
+        }
+
+        const isMember = room.players.some(player => player.userId === user.id);
+
+        if (!isMember) {
+            response.writeHead(403, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'You are not a member of this room' }));
+            return true;
+        }
+
+        const surrenderingPlayer = room.surrenderedByUserId
+            ? room.players.find(
+                player => player.userId === room.surrenderedByUserId
+            )
+            : null;
+
+        const winningPlayer = surrenderingPlayer
+            ? room.players.find(
+                player => player.userId !== surrenderingPlayer.userId
+            )
+            : null;
+
+        const duelResult =
+            room.status === 'finished' && surrenderingPlayer && winningPlayer
+                ? {
+                    outcome: user.id === surrenderingPlayer.userId
+                        ? 'lost'
+                        : 'won',
+                    winnerName: winningPlayer.displayName,
+                    loserName: surrenderingPlayer.displayName
+                }
+                : null;
+
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({
+            room: {
+                code: room.code,
+                status: room.status
+            },
+            result: duelResult
+        }));
+        return true;
+    }
+
+    const roomSurrenderMatch = url.pathname.match(
+        /^\/api\/rooms\/([^/]+)\/surrender$/
+    );
+
+    if (request.method === 'POST' && roomSurrenderMatch) {
+        const user = getSignedInUser(request);
+
+        if (!user) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Not signed in' }));
+            return true;
+        }
+
+        const room = getRoomByCode(roomSurrenderMatch[1]);
+
+        if (!room) {
+            response.writeHead(404, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Room not found' }));
+            return true;
+        }
+
+        const roomPlayer = room.players.find(
+            player => player.userId === user.id
+        );
+
+        if (!roomPlayer) {
+            response.writeHead(403, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({
+                error: 'You are not a member of this room'
+            }));
+            return true;
+        }
+
+        if (room.status !== 'active') {
+            response.writeHead(409, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: 'Room is not active' }));
+            return true;
+        }
+
+        if (!finishRoom(room.id, user.id)) {
+            response.writeHead(409, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({
+                error: 'Room is no longer active'
+            }));
+            return true;
+        }
+
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ ok: true, status: 'finished' }));
+        return true;
+    }
+
     const roomStateMatch = url.pathname.match(
         /^\/api\/rooms\/([^/]+)\/state$/
     );
@@ -203,6 +319,12 @@ async function handleRoomRoute(request, response, url) {
                     status: room.status
                 },
                 role,
+                playerNames: {
+                    player: roomPlayer.displayName,
+                    opponent: room.players.find(
+                        player => player.userId !== user.id
+                    )?.displayName || 'Opponent'
+                },
                 gameState: createGameStateView(gameState, role)
             }));
         } catch (error) {
