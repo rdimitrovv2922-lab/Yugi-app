@@ -18,6 +18,11 @@ Explore my other projects in the [rdimitrov project portfolio](https://github.co
 | ![Duel board showing the field, phases, turn, and Life Points](client/assets/screenshots/duel-board.png) | ![Duel board with the deck panel and card actions open](client/assets/screenshots/duel-board-deck.png) |
 | Track turns, phases, Life Points, and card locations. | View and choose cards from the deck during a duel. |
 
+| Both players' fields |
+| --- |
+| ![Duel board showing both players' fields, the opponent's turn, and Life Points](client/assets/screenshots/duel-board-both-fields.png) |
+| View the two duel fields together while the opponent's turn is active. |
+
 ## Features
 
 - Register and sign in with accounts persisted in SQLite.
