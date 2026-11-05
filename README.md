@@ -82,4 +82,10 @@ server/data/cards.json  Bundled card catalog
 
 This project is being developed as a portfolio application. The core flows are in place, while game rules and card effects are still handled manually by players. Multiplayer updates use periodic HTTP polling. Public deployment is planned after further work on the core functionality; there is no hosted demo at this stage.
 
+## Future development
+
+- **Private room chat:** Add private messaging for the two players in a room.
+- **Duel action log and replay support:** Record duel actions chronologically and use each room’s saved deck snapshots to support reviewing past duels and future replays.
+- **AI assistant-judge:** Explore a room-aware assistant grounded in Yu-Gi-Oh! rulings that can answer questions about card interactions and chain resolution using the current duel state.
+
 Card names, artwork, and related marks belong to their respective owners. This is an unofficial fan project and is not affiliated with or endorsed by Konami.
