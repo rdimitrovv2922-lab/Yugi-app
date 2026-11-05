@@ -1,26 +1,46 @@
 # Yugi
 
-Yugi is a browser-based Yu-Gi-Oh! duel-table prototype. It brings account sign-in, deck building, and a two-player room flow together with an interactive game board.
+Yugi is a browser-based Yu-Gi-Oh! duel-table prototype with account sign-in, deck building, and a two-player room flow.
 
-Portfolio index: [rdimitrov](https://github.com/rdimitrovv2922-lab/rdimitrov)
+Explore my other projects in the [rdimitrov project portfolio](https://github.com/rdimitrovv2922-lab/rdimitrov).
 
-> **Status:** Active prototype. The account, deck-building, room, and board flows are implemented. Players currently manage card effects themselves; the app does not automate the complete Yu-Gi-Oh! ruleset. There is no hosted demo yet.
+> **Status:** Active prototype. Account, deck-building, room, and board flows are implemented. Players manage card effects manually; the app does not automate the complete Yu-Gi-Oh! ruleset. There is no hosted demo yet.
+
+## Screenshots
+
+| Room lobby | Deck builder |
+| --- | --- |
+| ![Room lobby with create and join options](client/assets/screenshots/room-lobby.png) | ![Deck builder with saved deck, card search, and card preview](client/assets/screenshots/deck-builder.png) |
+| Create a room or join with a room code and selected deck. | Search the card catalog, inspect cards, and manage saved decks. |
+
+| Duel board | Duel board with deck open |
+| --- | --- |
+| ![Duel board showing the field, phases, turn, and Life Points](client/assets/screenshots/duel-board.png) | ![Duel board with the deck panel and card actions open](client/assets/screenshots/duel-board-deck.png) |
+| Track turns, phases, Life Points, and card locations. | View and choose cards from the deck during a duel. |
 
 ## Features
 
-- Register and sign in with locally stored accounts.
-- Search a bundled card catalog and preview card details.
+- Register and sign in with accounts persisted in SQLite.
+- Search the bundled card catalog and preview card details.
 - Build, validate, save, load, and delete Main, Extra, and Side Decks.
 - Create or join a two-player room with a short room code.
 - Track turns, phases, Life Points, and card locations on the duel board.
-- Save users, decks, rooms, and room game state in SQLite.
+- Persist decks, rooms, and room game-state snapshots in SQLite.
+
+## Architecture
+
+- Browser pages use native JavaScript modules and communicate with the server through a JSON API.
+- The built-in Node.js HTTP server routes requests to separate authentication, card catalog, deck, and game handlers.
+- SQLite stores user records, password hashes, decks, rooms, and room game-state snapshots.
+- Passwords are hashed with Node.js `scrypt` using a random salt. Session tokens are managed on the server in memory, so signing in again is required after a server restart.
+- Room clients periodically poll the API for room and game-state updates.
 
 ## Tech stack
 
-- **Frontend:** HTML, CSS, and browser JavaScript modules
-- **Backend:** Node.js built-in HTTP server and JSON API
+- **Frontend:** HTML, CSS, and browser-native JavaScript modules
+- **Backend:** Node.js built-in HTTP server and a project JSON API
 - **Storage:** SQLite through Node.js `node:sqlite`
-- **Dependencies:** No third-party npm packages
+- **Dependencies:** No third-party npm packages; the project uses Node.js built-ins and browser APIs for its server, storage, and client code.
 
 ## Run locally
 
@@ -40,21 +60,21 @@ Open [http://localhost:3000](http://localhost:3000), register an account, and bu
 
 The app creates `server/data/local.sqlite` on first launch. The database is local and ignored by Git.
 
-## Project layout
+## Project structure
 
 ```text
-client/                 Browser pages, styles, game UI, and shared rules
+client/                 Browser pages, styles, game UI, shared rules, and screenshots
 server/auth/            Account and session handling
 server/cards/           Card catalog loading and API formatting
 server/decks/           Deck persistence and validation
-server/game/             Multiplayer game-state creation and visibility
+server/game/            Multiplayer game-state creation and visibility
 server/routes/           Account, card, deck, and room API routes
-server/storage/          SQLite schema and migrations
-server/data/cards.json   Bundled card catalog
+server/storage/         SQLite schema and migrations
+server/data/cards.json  Bundled card catalog
 ```
 
 ## Development notes
 
-This project is being developed as a portfolio application. The current focus is on completing and refining the core flows before a public deployment. Room updates use periodic HTTP polling, and card effects are not automatically resolved.
+This project is being developed as a portfolio application. The core flows are in place, while game rules and card effects are still handled manually by players. Multiplayer updates use periodic HTTP polling. Public deployment is planned after further work on the core functionality; there is no hosted demo at this stage.
 
 Card names, artwork, and related marks belong to their respective owners. This is an unofficial fan project and is not affiliated with or endorsed by Konami.
